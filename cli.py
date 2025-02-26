@@ -3,6 +3,8 @@ import shutil
 import click
 import pathspec
 
+from prompts.sensitive_masker import SensitiveMasker, DEFAULT_SENSITIVE_PATTERNS
+
 OUTPUT_DIR = ".ppg_generated"
 
 # Mapping file extensions to markdown language hints
@@ -22,13 +24,17 @@ EXTENSION_MAPPING = {
     '.go': 'go'
 }
 
+
 @click.group()
 def cli():
     """A CLI tool that converts project files (excluding those in .gitignore) into markdown."""
     pass
 
+
 @cli.command()
-def gen():
+@click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
+@click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
+def gen(no_mask, add_pattern):
     """Generate markdown files for all project files (recursively) excluding ignored ones,
     then combine all generated markdown content into 000_all.md."""
     # Define the project root as the current working directory.
@@ -74,6 +80,20 @@ def gen():
     markdown_files_info = []
     seq_counter = 1
 
+    # Setup sensitive data masker by default, unless disabled
+    masker = None
+    if not no_mask or add_pattern:
+        # Initialize masker with default patterns if masking is enabled
+        patterns = DEFAULT_SENSITIVE_PATTERNS.copy() if not no_mask else []
+        masker = SensitiveMasker(patterns)
+
+        # Add any custom patterns
+        for pattern in add_pattern:
+            masker.add_pattern(pattern)
+
+        if not no_mask:
+            click.echo("Sensitive data masking is enabled (use --no-mask to disable)")
+
     # Convert each file into a markdown file.
     for file_full_path in files_to_process:
         rel_path = os.path.relpath(file_full_path, project_root)
@@ -85,6 +105,10 @@ def gen():
         except Exception as e:
             click.echo(f"Skipping {rel_path}: {e}")
             continue
+
+        # Mask sensitive data by default unless disabled
+        if masker and not no_mask:
+            file_content = masker.mask_content(file_content)
 
         # Determine language hint based on file extension.
         _, ext = os.path.splitext(file_full_path)
@@ -139,6 +163,7 @@ def gen():
             f_all.write(content)
             f_all.write("\n\n")
     click.echo("All content combined into 000_all.md")
+
 
 if __name__ == "__main__":
     cli()
