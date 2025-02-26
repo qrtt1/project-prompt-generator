@@ -5,7 +5,7 @@ import pathspec
 
 from prompts.sensitive_masker import SensitiveMasker, DEFAULT_SENSITIVE_PATTERNS
 
-OUTPUT_DIR = ".ppg_generated"
+OUTPUT_DIR = "ppg_generated"
 
 # Mapping file extensions to markdown language hints
 EXTENSION_MAPPING = {
