@@ -118,5 +118,4 @@ __pycache__/
 # Virtual environments
 venv/
 env/
-.ppg_generated
-ppg_generated
+.envrc

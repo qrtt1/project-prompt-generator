@@ -8,7 +8,8 @@ large language models (LLMs) 🤖.
 - **Flexible Output Options:** 🔀 Generate individual markdown files or a single consolidated file.
 - **Automatic Markdown Conversion:** 🔄 Converts all project files (excluding those in `.gitignore`) into individual
   markdown files.
-- **Structured Output:** 📂 Optional creation of a comprehensive all-in-one file containing an outline and the content of all
+- **Structured Output:** 📂 Optional creation of a comprehensive all-in-one file containing an outline and the content of
+  all
   converted files, making it easy to feed into LLMs.
 - **Code Highlighting:** 🌈 Automatically detects file extensions and applies appropriate markdown code highlighting.
 - **Customizable Ignored Files:** 🛡️ Respects `.gitignore` and includes additional custom ignore patterns.
@@ -39,6 +40,7 @@ ppg gen
 ```
 
 This creates a `ppg_generated` directory containing:
+
 - `000_outline.md`: 🗺️ A table of contents for all generated markdown files.
 - Individual markdown files for each project file (e.g., `001_cli.py.md`, `002_README.md`, etc.).
 
@@ -54,6 +56,7 @@ ppg all
 ```
 
 This creates a single file `ppg_created_all.md.txt` in the current directory containing:
+
 - An outline listing all processed files.
 - The content of all files converted to markdown format.
 
@@ -80,6 +83,7 @@ Default patterns will detect common sensitive information like:
 ## Example Output Structure 🌳
 
 ### When using `ppg generate`:
+
 ```
 ppg_generated/
 ├── 000_outline.md
@@ -90,9 +94,55 @@ ppg_generated/
 ```
 
 ### When using `ppg generate_all_in_one`:
+
 ```
 ./ppg_created_all.md.txt
 ```
+
+### Environment Variable Configuration 🔧
+
+You can customize the output locations using environment variables:
+
+```bash
+# Change the output directory (default: ppg_generated)
+export PPG_OUTPUT_DIR=custom_output_folder
+ppg generate
+
+# Change the all-in-one output file name (default: ppg_created_all.md.txt)
+export PPG_OUTPUT_FILE=project_documentation.md
+ppg all
+
+# Use both together
+export PPG_OUTPUT_DIR=docs
+export PPG_OUTPUT_FILE=full_project.md
+ppg all
+```
+
+Advanced path features:
+
+```bash
+# Use home directory paths with ~
+export PPG_OUTPUT_DIR=~/documents/project_docs
+export PPG_OUTPUT_FILE=~/documents/project_docs/full_docs.md
+
+# Use shell environment variables
+export PPG_OUTPUT_DIR=$HOME/documents/project_docs
+export PPG_OUTPUT_FILE=${HOME}/documents/project_docs/full_docs.md
+
+# Use absolute paths
+export PPG_OUTPUT_DIR=/var/www/docs/project
+export PPG_OUTPUT_FILE=/shared/documents/project_output.md
+
+# Use nested paths that don't exist yet (directories will be created automatically)
+export PPG_OUTPUT_DIR=docs/markdown/generated
+export PPG_OUTPUT_FILE=reports/2025/q1/project_report.md
+```
+
+These environment variables provide flexibility for:
+
+- Integration with automated workflows 🤖
+- Customizing output for different projects 📂
+- Directing output to specific documentation folders 📚
 
 ## Project Structure 📁
 

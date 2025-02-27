@@ -7,12 +7,41 @@ import os
 import shutil
 import click
 import pathspec
+import re
 from .sensitive_masker import SensitiveMasker, DEFAULT_SENSITIVE_PATTERNS
 from .file_processor import process_file, get_files_to_process, create_outline
 
-# Constants
-OUTPUT_DIR = "ppg_generated"
-SINGLE_OUTPUT_FILE = "ppg_created_all.md.txt"
+def expand_path_variables(path):
+    """
+    Expand environment variables in a path string.
+    Handles both $VAR and ${VAR} formats, as well as ~ for home directory.
+    """
+    if not path:
+        return path
+
+    # First pass: expand ~ for home directory
+    path = os.path.expanduser(path)
+
+    # Second pass: handle ${VAR} format
+    path = os.path.expandvars(path)
+
+    # Third pass: handle $VAR format (for any remaining variables)
+    # This is a fallback in case os.path.expandvars missed any
+    def replace_var(match):
+        var_name = match.group(1)
+        return os.environ.get(var_name, match.group(0))
+
+    path = re.sub(r'\$([A-Za-z0-9_]+)', replace_var, path)
+
+    return path
+
+# Constants with environment variable overrides
+# Expand both ~ and environment variables in paths
+raw_output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
+raw_output_file = os.environ.get("PPG_OUTPUT_FILE", "ppg_created_all.md.txt")
+
+OUTPUT_DIR = expand_path_variables(raw_output_dir)
+SINGLE_OUTPUT_FILE = expand_path_variables(raw_output_file)
 
 
 def _create_masker(no_mask, add_pattern):
@@ -33,13 +62,31 @@ def _create_masker(no_mask, add_pattern):
     return masker
 
 
+def ensure_directory_exists(path):
+    """
+    Ensure that a directory exists, creating it if necessary.
+    Works with both relative and absolute paths, and handles home directory (~) expansion.
+    """
+    directory = os.path.dirname(path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+        click.echo(f"Created directory: {directory}")
+
+
 def generate_individual_files(no_mask, add_pattern):
     """Generate individual markdown files in the output directory"""
     # Define the project root as the current working directory
     project_root = os.getcwd()
 
+    # Log the output directory being used (helpful when using environment variables)
+    click.echo(f"Using output directory: {OUTPUT_DIR}")
+
     # Remove the output directory if it exists and recreate it
     output_dir_path = os.path.join(project_root, OUTPUT_DIR)
+    # Handle absolute paths if OUTPUT_DIR is absolute
+    if os.path.isabs(OUTPUT_DIR):
+        output_dir_path = OUTPUT_DIR
+
     if os.path.exists(output_dir_path):
         shutil.rmtree(output_dir_path)
     os.makedirs(output_dir_path)
@@ -86,6 +133,9 @@ def generate_single_file(no_mask, add_pattern):
     """Generate a single markdown file with all content"""
     project_root = os.getcwd()
 
+    # Log the output file being used (helpful when using environment variables)
+    click.echo(f"Using output file: {SINGLE_OUTPUT_FILE}")
+
     # Get files and initialize masker
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
     masker = _create_masker(no_mask, add_pattern)
@@ -113,7 +163,13 @@ def generate_single_file(no_mask, add_pattern):
     outline_content = create_outline(markdown_files_info)
 
     # Create the all-in-one file
-    all_file_path = os.path.join(project_root, SINGLE_OUTPUT_FILE)
+    all_file_path = SINGLE_OUTPUT_FILE
+    if not os.path.isabs(SINGLE_OUTPUT_FILE):
+        all_file_path = os.path.join(project_root, SINGLE_OUTPUT_FILE)
+
+    # Ensure parent directory exists
+    ensure_directory_exists(all_file_path)
+
     with open(all_file_path, "w", encoding="utf-8") as f_all:
         f_all.write("# All Markdown Content\n\n")
         f_all.write("## Outline\n\n")
@@ -131,4 +187,4 @@ def generate_single_file(no_mask, add_pattern):
             f_all.write(markdown_content)
             f_all.write("\n\n")
 
-    click.echo(f"Created single all-in-one file: {SINGLE_OUTPUT_FILE}")
+    click.echo(f"Created single all-in-one file: {all_file_path}")
