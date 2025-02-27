@@ -26,13 +26,14 @@ EXTENSION_MAPPING = {
 }
 
 
-def get_files_to_process(project_root, output_dir):
+def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.md.txt"):
     """
     Get list of files to process, respecting .gitignore
 
     Args:
         project_root: Root directory of the project
         output_dir: Directory to exclude from processing
+        output_file: All-in-one output file to exclude from processing
 
     Returns:
         List of file paths to process
@@ -60,9 +61,15 @@ def get_files_to_process(project_root, output_dir):
         for file in files:
             file_full_path = os.path.join(root, file)
             rel_path = os.path.relpath(file_full_path, project_root)
+
             # Skip files ignored by .gitignore
             if ignore_spec and ignore_spec.match_file(rel_path):
                 continue
+
+            # Skip the all-in-one output file
+            if file == output_file:
+                continue
+
             files_to_process.append(file_full_path)
 
     # Sort files for a consistent sequence order

@@ -45,7 +45,7 @@ def generate_individual_files(no_mask, add_pattern):
     os.makedirs(output_dir_path)
 
     # Get files and initialize masker
-    files_to_process = get_files_to_process(project_root, OUTPUT_DIR)
+    files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
     masker = _create_masker(no_mask, add_pattern)
 
     markdown_files_info = []
@@ -87,7 +87,7 @@ def generate_single_file(no_mask, add_pattern):
     project_root = os.getcwd()
 
     # Get files and initialize masker
-    files_to_process = get_files_to_process(project_root, OUTPUT_DIR)
+    files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
     masker = _create_masker(no_mask, add_pattern)
 
     markdown_files_info = []
