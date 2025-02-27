@@ -1,4 +1,4 @@
-# ✨ prompt-generator (promg) 📝
+# ✨ project-prompt-generator (ppg) 📝
 
 A command-line tool to convert your project's files into structured markdown documents, ideal for generating prompts for
 large language models (LLMs) 🤖.
@@ -26,7 +26,7 @@ pip install .
 Navigate to your project's root directory and run:
 
 ```bash
-promg gen
+ppg gen
 ```
 
 This will create a `ppg_generated` directory containing:
@@ -41,10 +41,10 @@ The tool automatically masks sensitive data by default. You can control this beh
 
 ```bash
 # Disable sensitive data masking
-promg gen --no-mask
+ppg gen --no-mask
 
 # Add custom patterns for sensitive data detection
-promg gen --add-pattern "your_custom_regex_pattern"
+ppg gen --add-pattern "your_custom_regex_pattern"
 ```
 
 Default patterns will detect common sensitive information like:

@@ -31,6 +31,7 @@ setup(
     entry_points={
         "console_scripts": [
             "promg=cli:cli",
+            "ppg=cli:cli",
         ],
     },
 )
