@@ -18,6 +18,10 @@ DEFAULT_SENSITIVE_PATTERNS = [
     r'(AKIA[0-9A-Z]{16})',
     # Generic secrets
     r'(secret|auth)[_-]?(key|token)[\s]*[=:]\s*["\'`]([^"\'`\s]+)["\'`]',
+    # PowerShell ConvertTo-SecureString with plaintext
+    r'ConvertTo-SecureString\s+["\'`].*?["\'`]\s+-AsPlainText',
+    # PowerShell ConvertTo-SecureString alternative syntax
+    r'ConvertTo-SecureString\s+-String\s+["\'`].*?["\'`]',
 ]
 
 
@@ -77,6 +81,21 @@ class SensitiveMasker:
         def mask_match(match):
             # Get the full match
             full_match = match.group(0)
+
+            # Special handling for PowerShell ConvertTo-SecureString
+            if 'ConvertTo-SecureString' in full_match:
+                # Find the quoted password string - using a more robust pattern
+                # This handles passwords that may contain any characters between quotes
+                password_match = re.search(r'(["\'`])(.*?)\1', full_match)
+                if password_match:
+                    # Extract the quoted part including quotes
+                    quoted_pwd = password_match.group(0)
+                    # Get just the password content (without quotes)
+                    pwd_content = password_match.group(2)
+                    # Create masked password with same length, preserving quotes
+                    masked_pwd = password_match.group(1) + '*' * len(pwd_content) + password_match.group(1)
+                    # Replace just the password part
+                    return full_match.replace(quoted_pwd, masked_pwd)
 
             # If there are capture groups, we want to keep the variable names but mask the values
             if len(match.groups()) > 0:
