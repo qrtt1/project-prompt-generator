@@ -29,7 +29,7 @@ Navigate to your project's root directory and run:
 promg gen
 ```
 
-This will create a `.ppg_generated` directory containing:
+This will create a `ppg_generated` directory containing:
 
 - `000_all.md`: 📚 A single markdown file with the content of all project files.
 - `000_outline.md`: 🗺️ A table of contents for all generated markdown files.
@@ -58,7 +58,7 @@ Default patterns will detect common sensitive information like:
 ## Example Output Structure 🌳
 
 ```
-.ppg_generated/
+ppg_generated/
 ├── 000_all.md
 ├── 000_outline.md
 ├── 001_.gitignore.md
