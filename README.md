@@ -30,7 +30,12 @@ Navigate to your project's root directory and use one of the following commands:
 ### Generate Individual Markdown Files
 
 ```bash
+# Full command
 ppg generate
+
+# Aliases
+ppg g
+ppg gen
 ```
 
 This creates a `ppg_generated` directory containing:
@@ -40,20 +45,17 @@ This creates a `ppg_generated` directory containing:
 ### Generate a Single All-in-One File
 
 ```bash
+# Full command
 ppg generate_all_in_one
+
+# Aliases
+ppg a
+ppg all
 ```
 
 This creates a single file `ppg_created_all.md.txt` in the current directory containing:
 - An outline listing all processed files.
 - The content of all files converted to markdown format.
-
-### Legacy Command (Backward Compatibility)
-
-```bash
-ppg gen
-```
-
-The original command that combines both functionalities above. Creates a `ppg_generated` directory with individual files plus an `000_all.md` combined file. This command is maintained for backward compatibility.
 
 ### Security Options
 
