@@ -10,7 +10,7 @@ def cli():
     pass
 
 
-@cli.command(name="generate", aliases=["g", "gen"])
+@cli.command(name="generate")
 @click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
 @click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
 def generate(no_mask, add_pattern):
@@ -18,11 +18,45 @@ def generate(no_mask, add_pattern):
     generate_individual_files(no_mask, add_pattern)
 
 
-@cli.command(name="generate_all_in_one", aliases=["a", "all"])
+# Add command aliases using Click's alternative method
+@cli.command(name="g")
+@click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
+@click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
+def generate_alias1(no_mask, add_pattern):
+    """Alias for generate command."""
+    generate_individual_files(no_mask, add_pattern)
+
+
+@cli.command(name="gen")
+@click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
+@click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
+def generate_alias2(no_mask, add_pattern):
+    """Alias for generate command."""
+    generate_individual_files(no_mask, add_pattern)
+
+
+@cli.command(name="generate_all_in_one")
 @click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
 @click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
 def generate_all_in_one(no_mask, add_pattern):
     """Generate a single all-in-one markdown file for all project files."""
+    generate_single_file(no_mask, add_pattern)
+
+
+# Add command aliases for generate_all_in_one
+@cli.command(name="a")
+@click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
+@click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
+def all_alias1(no_mask, add_pattern):
+    """Alias for generate_all_in_one command."""
+    generate_single_file(no_mask, add_pattern)
+
+
+@cli.command(name="all")
+@click.option('--no-mask', is_flag=True, help='Disable sensitive data masking.')
+@click.option('--add-pattern', multiple=True, help='Add custom regex patterns to mask sensitive data.')
+def all_alias2(no_mask, add_pattern):
+    """Alias for generate_all_in_one command."""
     generate_single_file(no_mask, add_pattern)
 
 
