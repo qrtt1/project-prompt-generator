@@ -72,7 +72,7 @@ def ensure_directory_exists(path):
         print(f"Created directory: {directory}")
 
 
-def generate_individual_files(no_mask, add_pattern):
+def generate_individual_files(no_mask, add_pattern, replace=None):
     """Generate individual markdown files in the output directory"""
     # Define the project root as the current working directory
     project_root = os.getcwd()
@@ -100,7 +100,7 @@ def generate_individual_files(no_mask, add_pattern):
     # Process each file
     for file_full_path in files_to_process:
         rel_path = os.path.relpath(file_full_path, project_root)
-        markdown_content = process_file(file_full_path, project_root, masker, no_mask)
+        markdown_content = process_file(file_full_path, project_root, masker, no_mask, replace)
         if not markdown_content:
             continue
 
@@ -128,7 +128,7 @@ def generate_individual_files(no_mask, add_pattern):
     print(f"Generated {len(markdown_files_info)} individual markdown files in {OUTPUT_DIR}/")
 
 
-def generate_single_file(no_mask, add_pattern):
+def generate_single_file(no_mask, add_pattern, replace=None):
     """Generate a single markdown file with all content"""
     project_root = os.getcwd()
 
@@ -145,7 +145,7 @@ def generate_single_file(no_mask, add_pattern):
     # Process each file
     for file_full_path in files_to_process:
         rel_path = os.path.relpath(file_full_path, project_root)
-        markdown_content = process_file(file_full_path, project_root, masker, no_mask)
+        markdown_content = process_file(file_full_path, project_root, masker, no_mask, replace)
         if not markdown_content:
             continue
 
@@ -178,7 +178,7 @@ def generate_single_file(no_mask, add_pattern):
         # Write content for each file
         for seq, original, md_filename, rel_path in markdown_files_info:
             file_path = os.path.join(project_root, rel_path)
-            markdown_content = process_file(file_path, project_root, masker, no_mask)
+            markdown_content = process_file(file_path, project_root, masker, no_mask, replace)
             if not markdown_content:
                 continue
 

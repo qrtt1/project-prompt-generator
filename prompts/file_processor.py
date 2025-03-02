@@ -81,7 +81,7 @@ def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.
     return sorted(files_to_process, key=lambda p: os.path.relpath(p, project_root))
 
 
-def process_file(file_full_path, project_root, masker, no_mask):
+def process_file(file_full_path, project_root, masker, no_mask, replace=None):
     """
     Process a single file and generate its markdown representation
 
@@ -90,6 +90,7 @@ def process_file(file_full_path, project_root, masker, no_mask):
         project_root: Root directory of the project
         masker: SensitiveMasker instance
         no_mask: Flag to disable masking
+        replace (dict, optional): Dictionary of string replacements. Defaults to None.
 
     Returns:
         Markdown content as a string, or None if processing failed
@@ -102,6 +103,11 @@ def process_file(file_full_path, project_root, masker, no_mask):
     except Exception as e:
         print(f"Skipping {rel_path}: {e}")
         return None
+
+    # Apply string replacements if specified
+    if replace:
+        for old, new in replace.items():
+            file_content = file_content.replace(old, new)
 
     # Mask sensitive data by default unless disabled
     if masker and not no_mask:
