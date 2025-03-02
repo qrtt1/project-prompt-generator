@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="project-prompt-generator",
-    version="0.1.2",
+    version="0.1.4",
     author="Ching Yi, Chan",
     author_email="chingyichan.tw@gmail.com",
     description="A tool to convert project files into structured markdown for LLM prompts",
@@ -15,9 +15,14 @@ setup(
     packages=find_packages(),
     py_modules=["cli"],
     install_requires=[
-        "click",
         "pathspec"
     ],
+    extras_require={
+        "dev": [
+            "pytest",
+            "pytest-cov"
+        ]
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

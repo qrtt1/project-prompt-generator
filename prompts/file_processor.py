@@ -5,7 +5,6 @@ and creating markdown representations.
 """
 
 import os
-import click
 import pathspec
 
 # Mapping file extensions to markdown language hints
@@ -47,7 +46,7 @@ def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.
         ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", gitignore_lines)
 
     # Additional custom ignore patterns for directories
-    custom_ignore_dirs = {'promg.egg-info', 'venv', 'env', 'build', 'dist'}
+    custom_ignore_dirs = {'promg.egg-info', 'venv', 'env', 'build', 'dist', '.pytest_cache'}
 
     # Walk through the project directory and gather files
     files_to_process = []
@@ -95,7 +94,7 @@ def process_file(file_full_path, project_root, masker, no_mask):
         with open(file_full_path, "r", encoding="utf-8") as f:
             file_content = f.read()
     except Exception as e:
-        click.echo(f"Skipping {rel_path}: {e}")
+        print(f"Skipping {rel_path}: {e}")
         return None
 
     # Mask sensitive data by default unless disabled

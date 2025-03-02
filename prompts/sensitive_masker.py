@@ -104,7 +104,7 @@ class SensitiveMasker:
                     parts = re.split(r'([=:]\s*["\'`])', full_match, 1)
                     if len(parts) >= 3:
                         # Keep the variable name and assignment operator, mask just the value
-                        masked_value = '*' * len(parts[2].rstrip('"\'\`'))
+                        masked_value = '*' * len(parts[2].strip('"\'`'))
                         return parts[0] + parts[1] + masked_value + parts[2][-1] if parts[2] else parts[0] + parts[
                             1] + masked_value
 

@@ -5,7 +5,6 @@ Contains functionality for generating individual markdown files and combined out
 
 import os
 import shutil
-import click
 import pathspec
 import re
 from .sensitive_masker import SensitiveMasker, DEFAULT_SENSITIVE_PATTERNS
@@ -57,7 +56,7 @@ def _create_masker(no_mask, add_pattern):
             masker.add_pattern(pattern)
 
         if not no_mask:
-            click.echo("Sensitive data masking is enabled (use --no-mask to disable)")
+            print("Sensitive data masking is enabled (use --no-mask to disable)")
 
     return masker
 
@@ -70,7 +69,7 @@ def ensure_directory_exists(path):
     directory = os.path.dirname(path)
     if directory and not os.path.exists(directory):
         os.makedirs(directory)
-        click.echo(f"Created directory: {directory}")
+        print(f"Created directory: {directory}")
 
 
 def generate_individual_files(no_mask, add_pattern):
@@ -79,7 +78,7 @@ def generate_individual_files(no_mask, add_pattern):
     project_root = os.getcwd()
 
     # Log the output directory being used (helpful when using environment variables)
-    click.echo(f"Using output directory: {OUTPUT_DIR}")
+    print(f"Using output directory: {OUTPUT_DIR}")
 
     # Remove the output directory if it exists and recreate it
     output_dir_path = os.path.join(project_root, OUTPUT_DIR)
@@ -116,7 +115,7 @@ def generate_individual_files(no_mask, add_pattern):
             f.write(markdown_content)
 
         markdown_files_info.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
-        click.echo(f"Converted {rel_path} to markdown as {md_filename}")
+        print(f"Converted {rel_path} to markdown as {md_filename}")
         seq_counter += 1
 
     # Create outline file
@@ -125,8 +124,8 @@ def generate_individual_files(no_mask, add_pattern):
     with open(outline_path, "w", encoding="utf-8") as f:
         f.write(outline_content)
 
-    click.echo("Outline file created as 000_outline.md")
-    click.echo(f"Generated {len(markdown_files_info)} individual markdown files in {OUTPUT_DIR}/")
+    print("Outline file created as 000_outline.md")
+    print(f"Generated {len(markdown_files_info)} individual markdown files in {OUTPUT_DIR}/")
 
 
 def generate_single_file(no_mask, add_pattern):
@@ -134,7 +133,7 @@ def generate_single_file(no_mask, add_pattern):
     project_root = os.getcwd()
 
     # Log the output file being used (helpful when using environment variables)
-    click.echo(f"Using output file: {SINGLE_OUTPUT_FILE}")
+    print(f"Using output file: {SINGLE_OUTPUT_FILE}")
 
     # Get files and initialize masker
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
@@ -156,7 +155,7 @@ def generate_single_file(no_mask, add_pattern):
         md_filename = f"{seq_str}_{flat_rel_path}.md"
 
         markdown_files_info.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
-        click.echo(f"Processed {rel_path}")
+        print(f"Processed {rel_path}")
         seq_counter += 1
 
     # Create the outline
@@ -187,4 +186,4 @@ def generate_single_file(no_mask, add_pattern):
             f_all.write(markdown_content)
             f_all.write("\n\n")
 
-    click.echo(f"Created single all-in-one file: {all_file_path}")
+    print(f"Created single all-in-one file: {all_file_path}")
