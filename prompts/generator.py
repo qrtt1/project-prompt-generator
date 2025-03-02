@@ -43,17 +43,13 @@ OUTPUT_DIR = expand_path_variables(raw_output_dir)
 SINGLE_OUTPUT_FILE = expand_path_variables(raw_output_file)
 
 
-def _create_masker(no_mask, add_pattern):
+def _create_masker(no_mask):
     """Create and configure the sensitive data masker"""
     masker = None
-    if not no_mask or add_pattern:
+    if not no_mask:
         # Initialize masker with default patterns if masking is enabled
-        patterns = DEFAULT_SENSITIVE_PATTERNS.copy() if not no_mask else []
+        patterns = DEFAULT_SENSITIVE_PATTERNS.copy()
         masker = SensitiveMasker(patterns)
-
-        # Add any custom patterns
-        for pattern in add_pattern:
-            masker.add_pattern(pattern)
 
         if not no_mask:
             print("Sensitive data masking is enabled (use --no-mask to disable)")
@@ -72,7 +68,7 @@ def ensure_directory_exists(path):
         print(f"Created directory: {directory}")
 
 
-def generate_individual_files(no_mask, add_pattern):
+def generate_individual_files(no_mask):
     """Generate individual markdown files in the output directory"""
     # Define the project root as the current working directory
     project_root = os.getcwd()
@@ -92,7 +88,7 @@ def generate_individual_files(no_mask, add_pattern):
 
     # Get files and initialize masker
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
-    masker = _create_masker(no_mask, add_pattern)
+    masker = _create_masker(no_mask)
 
     markdown_files_info = []
     seq_counter = 1
@@ -128,7 +124,7 @@ def generate_individual_files(no_mask, add_pattern):
     print(f"Generated {len(markdown_files_info)} individual markdown files in {OUTPUT_DIR}/")
 
 
-def generate_single_file(no_mask, add_pattern):
+def generate_single_file(no_mask):
     """Generate a single markdown file with all content"""
     project_root = os.getcwd()
 
@@ -137,7 +133,7 @@ def generate_single_file(no_mask, add_pattern):
 
     # Get files and initialize masker
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
-    masker = _create_masker(no_mask, add_pattern)
+    masker = _create_masker(no_mask)
 
     markdown_files_info = []
     seq_counter = 1

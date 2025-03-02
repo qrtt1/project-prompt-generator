@@ -6,6 +6,7 @@ and creating markdown representations.
 
 import os
 import pathspec
+from .ignore_handler import load_gitignore_patterns
 
 # Mapping file extensions to markdown language hints
 EXTENSION_MAPPING = {
@@ -37,13 +38,9 @@ def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.
     Returns:
         List of file paths to process
     """
-    # Load .gitignore patterns if the file exists
-    gitignore_path = os.path.join(project_root, ".gitignore")
-    ignore_spec = None
-    if os.path.exists(gitignore_path):
-        with open(gitignore_path, "r", encoding="utf-8") as f:
-            gitignore_lines = f.read().splitlines()
-        ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", gitignore_lines)
+    # Load .gitignore patterns from multiple sources
+    ignore_spec = load_gitignore_patterns(project_root)
+
 
     # Additional custom ignore patterns for directories
     default_ignore_dirs = {'promg.egg-info', 'venv', 'env', 'build', 'dist', '.pytest_cache'}

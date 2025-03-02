@@ -25,6 +25,7 @@ Examples:
 Environment Variables:
   PPG_OUTPUT_DIR           # Custom output directory (default: ppg_generated)
   PPG_OUTPUT_FILE          # Custom output filename (default: ppg_created_all.md.txt)
+  PPG_IGNORE_FILES         # Comma-separated list of .gitignore files
 
 For more information, visit: https://github.com/qrtt1/project-prompt-generator
 """
@@ -39,12 +40,6 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
             "action": "store_true",
             "help": "Disable sensitive data masking (default: enabled)"
         },
-        "--add-pattern": {
-            "action": "append",
-            "default": [],
-            "metavar": "REGEX",
-            "help": "Add custom regex patterns to mask sensitive data"
-        }
     }
 
     # Add generate command
@@ -91,10 +86,10 @@ Output location can be customized with the PPG_OUTPUT_FILE environment variable.
 
     if args.command in ["generate", "g", "gen"]:
         print(f"Using output directory: {output_dir}")
-        generate_individual_files(args.no_mask, args.add_pattern)
+        generate_individual_files(args.no_mask)
     elif args.command in ["generate_all_in_one", "a", "all"]:
         print(f"Using output file: {output_file}")
-        generate_single_file(args.no_mask, args.add_pattern)
+        generate_single_file(args.no_mask)
 
 
 if __name__ == "__main__":
