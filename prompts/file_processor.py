@@ -5,25 +5,11 @@ and creating markdown representations.
 """
 
 import os
-import pathspec
-from .ignore_handler import load_gitignore_patterns
 
-# Mapping file extensions to markdown language hints
-EXTENSION_MAPPING = {
-    '.py': 'python',
-    '.js': 'javascript',
-    '.ts': 'typescript',
-    '.html': 'html',
-    '.css': 'css',
-    '.json': 'json',
-    '.sh': 'bash',
-    '.java': 'java',
-    '.c': 'c',
-    '.cpp': 'cpp',
-    '.rb': 'ruby',
-    '.php': 'php',
-    '.go': 'go'
-}
+import pathspec
+
+from .ignore_handler import load_gitignore_patterns
+from .language_mapping import EXTENSION_MAPPING
 
 
 def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.md.txt"):
@@ -40,7 +26,6 @@ def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.
     """
     # Load .gitignore patterns from multiple sources
     ignore_spec = load_gitignore_patterns(project_root)
-
 
     # Additional custom ignore patterns for directories
     default_ignore_dirs = {'promg.egg-info', 'venv', 'env', 'build', 'dist', '.pytest_cache'}

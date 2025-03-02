@@ -1,5 +1,7 @@
 import os
+
 import pathspec
+
 
 def load_gitignore_patterns(project_root):
     """

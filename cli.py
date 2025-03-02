@@ -1,10 +1,8 @@
 import argparse
-import sys
 import os
-from prompts.generator import (
-    generate_individual_files,
-    generate_single_file,
-)
+import sys
+
+from prompts.generator import generate_individual_files, generate_single_file
 
 
 def cli():

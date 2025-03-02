@@ -3,7 +3,9 @@ Tests for the sensitive_masker module.
 """
 
 import pytest
+
 from prompts.sensitive_masker import SensitiveMasker, mask_sensitive_data
+
 
 def test_mask_api_key():
     # Test basic API key masking

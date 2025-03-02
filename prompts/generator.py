@@ -4,35 +4,13 @@ Contains functionality for generating individual markdown files and combined out
 """
 
 import os
-import shutil
-import pathspec
 import re
-from .sensitive_masker import SensitiveMasker, DEFAULT_SENSITIVE_PATTERNS
-from .file_processor import process_file, get_files_to_process, create_outline
+import shutil
 
-def expand_path_variables(path):
-    """
-    Expand environment variables in a path string.
-    Handles both $VAR and ${VAR} formats, as well as ~ for home directory.
-    """
-    if not path:
-        return path
-
-    # First pass: expand ~ for home directory
-    path = os.path.expanduser(path)
-
-    # Second pass: handle ${VAR} format
-    path = os.path.expandvars(path)
-
-    # Third pass: handle $VAR format (for any remaining variables)
-    # This is a fallback in case os.path.expandvars missed any
-    def replace_var(match):
-        var_name = match.group(1)
-        return os.environ.get(var_name, match.group(0))
-
-    path = re.sub(r'\$([A-Za-z0-9_]+)', replace_var, path)
-
-    return path
+from .config_handler import expand_path_variables
+from .file_processor import create_outline, get_files_to_process, process_file
+from .file_utils import ensure_directory_exists
+from .sensitive_masker import DEFAULT_SENSITIVE_PATTERNS, SensitiveMasker
 
 # Constants with environment variable overrides
 # Expand both ~ and environment variables in paths
@@ -57,24 +35,10 @@ def _create_masker(no_mask):
     return masker
 
 
-def ensure_directory_exists(path):
-    """
-    Ensure that a directory exists, creating it if necessary.
-    Works with both relative and absolute paths, and handles home directory (~) expansion.
-    """
-    directory = os.path.dirname(path)
-    if directory and not os.path.exists(directory):
-        os.makedirs(directory)
-        print(f"Created directory: {directory}")
-
-
 def generate_individual_files(no_mask):
     """Generate individual markdown files in the output directory"""
     # Define the project root as the current working directory
     project_root = os.getcwd()
-
-    # Log the output directory being used (helpful when using environment variables)
-    print(f"Using output directory: {OUTPUT_DIR}")
 
     # Remove the output directory if it exists and recreate it
     output_dir_path = os.path.join(project_root, OUTPUT_DIR)
@@ -127,9 +91,6 @@ def generate_individual_files(no_mask):
 def generate_single_file(no_mask):
     """Generate a single markdown file with all content"""
     project_root = os.getcwd()
-
-    # Log the output file being used (helpful when using environment variables)
-    print(f"Using output file: {SINGLE_OUTPUT_FILE}")
 
     # Get files and initialize masker
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
