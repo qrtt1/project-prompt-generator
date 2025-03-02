@@ -1,22 +1,16 @@
 # ✨ project-prompt-generator (ppg) 📝
 
-A command-line tool to convert your project's files into structured markdown documents, ideal for generating prompts for
-large language models (LLMs) 🤖.
+A command-line tool to convert your project's files into structured markdown documents, ideal for generating prompts for large language models (LLMs) 🤖.
 
 ## Features 🌟
 
 - **Flexible Output Options:** 🔀 Generate individual markdown files or a single consolidated file.
-- **Automatic Markdown Conversion:** 🔄 Converts all project files (excluding those in `.gitignore`) into individual
-  markdown files.
-- **Structured Output:** 📂 Optional creation of a comprehensive all-in-one file containing an outline and the content of
-  all
-  converted files, making it easy to feed into LLMs.
-- **Code Highlighting:** 🌈 Automatically detects file extensions and applies appropriate markdown code highlighting.
-- **Customizable Ignored Files:** 🛡️ Respects `.gitignore` and includes additional custom ignore patterns.
-- **Organized Output:** 📋 Generates an outline file to provide a clear overview of all converted files.
-- **Sensitive Data Masking:** 🔒 Automatically detects and masks API keys, passwords, and other sensitive information (
-  enabled by default).
-- **Modular Architecture:** 🧩 Easy to extend with new features and functionality.
+- **Automatic Markdown Conversion:** 🔄 Converts all project files (excluding those in `.gitignore`) into individual markdown files.
+- **Structured Output:** 📂 Option to create an all-in-one file that includes an outline and the content of all converted files for easy use with LLMs.
+- **Code Highlighting:** 🌈 Automatically detects file extensions and applies proper markdown code highlighting.
+- **Customizable Ignored Files:** 🛡️ Respects `.gitignore` and supports additional custom ignore patterns.
+- **Organized Output:** 📋 Generates an outline file that clearly lists all converted files.
+- **Sensitive Data Masking:** 🔒 Automatically detects and masks API keys, passwords, and other sensitive information (enabled by default).
 
 ## Installation 🛠️
 
@@ -166,13 +160,19 @@ project-prompt-generator/
 
 ## How it Works ⚙️
 
-1. The tool scans your project directory, respecting `.gitignore`, custom ignore patterns specified by the `CUSTOM_IGNORE_DIRS` environment variable. 🔍
-2. Each file is converted into a markdown file with a header containing the filename and path, followed by the file's
-   content enclosed in a code block with appropriate language highlighting. 📝
-3. Sensitive data in the content is automatically detected and masked with asterisks (*) to protect security
-   credentials. 🔒
-4. Depending on the command used, the tool either generates individual files or a single combined file. 🧩
+1. The tool scans your project directory, respecting `.gitignore` and any custom ignore patterns specified via the `CUSTOM_IGNORE_DIRS` environment variable. 🔍
+2. Each file is converted into a markdown file with a header showing the filename and path, followed by its content enclosed in a code block with appropriate language highlighting. 📝
+3. Sensitive data is automatically detected and masked with asterisks (*) to protect your credentials. 🔒
+4. Depending on the command used, the tool generates either individual markdown files or a single consolidated file. 🧩
 
 ## License 📄
 
 This project is licensed under the MIT License. 🎉
+
+---
+
+## Additional Notes
+
+- This is a simple, experimental project created to assist with daily tasks.
+- If you need a more mature solution, consider exploring [Repomix](https://repomix.com/).
+- We intend to learn from Repomix's features and may integrate new ideas in future updates.
