@@ -101,7 +101,7 @@ ppg_generated/
 
 ### Environment Variable Configuration 🔧
 
-You can customize the output locations using environment variables:
+You can customize the output locations and ignored directories using environment variables:
 
 ```bash
 # Change the output directory (default: ppg_generated)
@@ -112,9 +112,14 @@ ppg generate
 export PPG_OUTPUT_FILE=project_documentation.md
 ppg all
 
-# Use both together
+# Define custom directories to ignore (comma-separated)
+export CUSTOM_IGNORE_DIRS="dir1,dir2,dir3"
+ppg generate
+
+# Use all together
 export PPG_OUTPUT_DIR=docs
 export PPG_OUTPUT_FILE=full_project.md
+export CUSTOM_IGNORE_DIRS="temp,cache"
 ppg all
 ```
 
@@ -143,6 +148,7 @@ These environment variables provide flexibility for:
 - Integration with automated workflows 🤖
 - Customizing output for different projects 📂
 - Directing output to specific documentation folders 📚
+- Ignoring specific directories from prompt generation 🙈
 
 ## Project Structure 📁
 
@@ -160,7 +166,7 @@ project-prompt-generator/
 
 ## How it Works ⚙️
 
-1. The tool scans your project directory, respecting `.gitignore` and custom ignore patterns. 🔍
+1. The tool scans your project directory, respecting `.gitignore`, custom ignore patterns specified by the `CUSTOM_IGNORE_DIRS` environment variable. 🔍
 2. Each file is converted into a markdown file with a header containing the filename and path, followed by the file's
    content enclosed in a code block with appropriate language highlighting. 📝
 3. Sensitive data in the content is automatically detected and masked with asterisks (*) to protect security

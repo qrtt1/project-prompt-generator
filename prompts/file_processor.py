@@ -46,7 +46,13 @@ def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.
         ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", gitignore_lines)
 
     # Additional custom ignore patterns for directories
-    custom_ignore_dirs = {'promg.egg-info', 'venv', 'env', 'build', 'dist', '.pytest_cache'}
+    default_ignore_dirs = {'promg.egg-info', 'venv', 'env', 'build', 'dist', '.pytest_cache'}
+    custom_ignore_dirs_str = os.environ.get("CUSTOM_IGNORE_DIRS")
+    if custom_ignore_dirs_str:
+        custom_ignore_dirs = set(custom_ignore_dirs_str.split(','))
+        custom_ignore_dirs.update(default_ignore_dirs)
+    else:
+        custom_ignore_dirs = default_ignore_dirs
 
     # Walk through the project directory and gather files
     files_to_process = []
