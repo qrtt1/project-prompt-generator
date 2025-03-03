@@ -14,6 +14,7 @@ from .file_processor import create_outline, get_files_to_process, process_file
 from .file_utils import ensure_directory_exists
 from .sensitive_masker import DEFAULT_SENSITIVE_PATTERNS, SensitiveMasker
 from .types import FileEntry
+from .output_formatters import get_output_formatter  # Import the function instead
 
 # Constants with environment variable overrides
 # Expand both ~ and environment variables in paths
@@ -38,6 +39,64 @@ def _create_masker(no_mask):
     return masker
 
 
+def collect_file_entries(project_root: str, files_to_process: List[str]) -> List[FileEntry]:
+    """
+    Collects file information into a list of FileEntry objects.
+    """
+    file_list: List[FileEntry] = []
+    seq_counter = 1
+    for file_path in files_to_process:
+        rel_path = os.path.relpath(file_path, project_root)
+        file_list.append(
+            FileEntry(
+                sequence=seq_counter,
+                relative_path=rel_path,
+                filename=os.path.basename(file_path),  # Just the filename
+                file_full_path=file_path,
+            )
+        )
+        seq_counter += 1
+    return file_list
+
+
+def process_and_format_file(
+    file_entry: FileEntry,
+    project_root: str,
+    masker,
+    no_mask: bool,
+    output_formatter,  # Remove type hint
+    output_dir_path: str,
+) -> None:
+    """
+    Processes a single file, formats the content, and writes it to the output directory.
+    """
+    processed_content = process_file(
+        file_entry.file_full_path, project_root, masker, no_mask
+    )
+    if not processed_content:
+        print(f"Skipping {file_entry.relative_path} due to processing error.")
+        return
+
+    # Generate a flat version of the relative path
+    flat_rel_path = file_entry.relative_path.replace(os.path.sep, "_")
+    seq_str = str(file_entry.sequence).zfill(3)
+    md_filename = f"{seq_str}_{flat_rel_path}.{output_formatter.file_extension}"
+    md_filepath = os.path.join(output_dir_path, md_filename)
+
+    formatted_content = output_formatter.format(
+        processed_content,
+        file_entry.filename,  # Use filename from FileEntry
+        file_entry.relative_path,
+    )
+
+    with open(md_filepath, "w", encoding="utf-8") as f:
+        f.write(formatted_content)
+
+    print(
+        f"Converted {file_entry.relative_path} to {output_formatter.name} as {md_filename}"
+    )
+
+
 def generate_individual_files(no_mask, output_formatter):
     """Generate individual files in the output directory"""
     # Define the project root as the current working directory
@@ -57,32 +116,12 @@ def generate_individual_files(no_mask, output_formatter):
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
     masker = _create_masker(no_mask)
 
-    file_list: List[FileEntry] = []
-    seq_counter = 1
+    file_list = collect_file_entries(project_root, files_to_process)
 
     # Process each file
-    for file_full_path in files_to_process:
-        rel_path = os.path.relpath(file_full_path, project_root)
-        processed_content = process_file(file_full_path, project_root, masker, no_mask)
-        if not processed_content:
-            continue
+    for file_entry in file_list:
+        process_and_format_file(file_entry, project_root, masker, no_mask, output_formatter, output_dir_path)
 
-        # Generate a flat version of the relative path
-        flat_rel_path = rel_path.replace(os.path.sep, "_")
-
-        seq_str = str(seq_counter).zfill(3)
-        md_filename = f"{seq_str}_{flat_rel_path}.{output_formatter.file_extension}"
-        md_filepath = os.path.join(output_dir_path, md_filename)
-
-        formatted_content = output_formatter.format(processed_content, os.path.basename(file_full_path), rel_path)
-
-        with open(md_filepath, "w", encoding="utf-8") as f:
-            f.write(formatted_content)
-
-        file_list.append(FileEntry(sequence=seq_counter, relative_path=rel_path, filename=file_full_path,
-                                   file_full_path=file_full_path))
-        print(f"Converted {rel_path} to {output_formatter.name} as {md_filename}")
-        seq_counter += 1
 
     # Create outline file
     outline_content = create_outline(file_list)
