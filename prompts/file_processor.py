@@ -98,10 +98,8 @@ def process_file(file_full_path, project_root, masker, no_mask):
 
     # Create markdown representation
     markdown_content = (
-        "## file description\n\n"
         f"filename: {os.path.basename(file_full_path)}\n"
         f"path: {rel_path}\n\n"
-        "## contenxt\n\n"
         f"{code_block_start}"
         f"{file_content}\n"
         "```"

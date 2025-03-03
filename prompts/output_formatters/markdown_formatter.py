@@ -24,7 +24,7 @@ class MarkdownFormatter(OutputFormatter):
             "## file description\n\n"
             f"filename: {filename}\n"
             f"path: {rel_path}\n\n"
-            "## contenxt\n\n"
+            "## content\n\n"
         )
         markdown_content += content
         return markdown_content
