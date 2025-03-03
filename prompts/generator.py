@@ -79,7 +79,6 @@ def generate_individual_files(no_mask, output_formatter):
         with open(md_filepath, "w", encoding="utf-8") as f:
             f.write(formatted_content)
 
-        # file_list.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
         file_list.append(FileEntry(sequence=seq_counter, relative_path=rel_path, filename=file_full_path,
                                    file_full_path=file_full_path))
         print(f"Converted {rel_path} to {output_formatter.name} as {md_filename}")
