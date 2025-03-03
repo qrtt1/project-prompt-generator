@@ -1,13 +1,10 @@
-from .output_formatter import OutputFormatter
 from .markdown_formatter import MarkdownFormatter
+from .json_formatter import JsonFormatter
 
-_formatters = {
-    "markdown": MarkdownFormatter,
-}
-
-
-def get_output_formatter(format_name):
-    formatter_class = _formatters.get(format_name.lower())
-    if not formatter_class:
+def get_output_formatter(format_name: str):
+    if format_name == "markdown":
+        return MarkdownFormatter()
+    elif format_name == "json":
+        return JsonFormatter()
+    else:
         raise ValueError(f"Unsupported output format: {format_name}")
-    return formatter_class()
