@@ -1,6 +1,6 @@
 """
-Generator module for converting project files to markdown.
-Contains functionality for generating individual markdown files and combined output.
+Generator module for converting project files.
+Contains functionality for generating individual files and combined output.
 """
 
 import os
@@ -11,6 +11,7 @@ from .config_handler import expand_path_variables
 from .file_processor import create_outline, get_files_to_process, process_file
 from .file_utils import ensure_directory_exists
 from .sensitive_masker import DEFAULT_SENSITIVE_PATTERNS, SensitiveMasker
+
 
 # Constants with environment variable overrides
 # Expand both ~ and environment variables in paths
@@ -35,8 +36,8 @@ def _create_masker(no_mask):
     return masker
 
 
-def generate_individual_files(no_mask):
-    """Generate individual markdown files in the output directory"""
+def generate_individual_files(no_mask, output_formatter):
+    """Generate individual files in the output directory"""
     # Define the project root as the current working directory
     project_root = os.getcwd()
 
@@ -60,36 +61,42 @@ def generate_individual_files(no_mask):
     # Process each file
     for file_full_path in files_to_process:
         rel_path = os.path.relpath(file_full_path, project_root)
-        markdown_content = process_file(file_full_path, project_root, masker, no_mask)
-        if not markdown_content:
+        processed_content = process_file(file_full_path, project_root, masker, no_mask)
+        if not processed_content:
             continue
 
         # Generate a flat version of the relative path
         flat_rel_path = rel_path.replace(os.path.sep, "_")
 
         seq_str = str(seq_counter).zfill(3)
-        md_filename = f"{seq_str}_{flat_rel_path}.md"
+        md_filename = f"{seq_str}_{flat_rel_path}.{output_formatter.file_extension}"
         md_filepath = os.path.join(output_dir_path, md_filename)
 
+        formatted_content = output_formatter.format(processed_content, os.path.basename(file_full_path), rel_path)
+
         with open(md_filepath, "w", encoding="utf-8") as f:
-            f.write(markdown_content)
+            f.write(formatted_content)
 
         markdown_files_info.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
-        print(f"Converted {rel_path} to markdown as {md_filename}")
+        print(f"Converted {rel_path} to {output_formatter.name} as {md_filename}")
         seq_counter += 1
 
     # Create outline file
     outline_content = create_outline(markdown_files_info)
-    outline_path = os.path.join(output_dir_path, "000_outline.md")
+    outline_filename = f"000_outline.{output_formatter.file_extension}"
+    outline_path = os.path.join(output_dir_path, outline_filename)
+
+    formatted_outline = output_formatter.format(outline_content, "000_outline", "")
+
     with open(outline_path, "w", encoding="utf-8") as f:
-        f.write(outline_content)
+        f.write(formatted_outline)
 
-    print("Outline file created as 000_outline.md")
-    print(f"Generated {len(markdown_files_info)} individual markdown files in {OUTPUT_DIR}/")
+    print(f"Outline file created as {outline_filename}")
+    print(f"Generated {len(markdown_files_info)} individual files in {OUTPUT_DIR}/")
 
 
-def generate_single_file(no_mask):
-    """Generate a single markdown file with all content"""
+def generate_single_file(no_mask, output_formatter):
+    """Generate a single file with all content"""
     project_root = os.getcwd()
 
     # Get files and initialize masker
@@ -102,14 +109,14 @@ def generate_single_file(no_mask):
     # Process each file
     for file_full_path in files_to_process:
         rel_path = os.path.relpath(file_full_path, project_root)
-        markdown_content = process_file(file_full_path, project_root, masker, no_mask)
-        if not markdown_content:
+        processed_content = process_file(file_full_path, project_root, masker, no_mask)
+        if not processed_content:
             continue
 
         # Generate reference filename (not creating actual file)
         flat_rel_path = rel_path.replace(os.path.sep, "_")
         seq_str = str(seq_counter).zfill(3)
-        md_filename = f"{seq_str}_{flat_rel_path}.md"
+        md_filename = f"{seq_str}_{flat_rel_path}"
 
         markdown_files_info.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
         print(f"Processed {rel_path}")
@@ -127,20 +134,25 @@ def generate_single_file(no_mask):
     ensure_directory_exists(all_file_path)
 
     with open(all_file_path, "w", encoding="utf-8") as f_all:
-        f_all.write("# All Markdown Content\n\n")
-        f_all.write("## Outline\n\n")
-        f_all.write(outline_content)
+        f_all.write(f"# All Content\n\n")
+        f_all.write(f"## Outline\n\n")
+
+        formatted_outline = output_formatter.format(outline_content, "Outline", "")
+        f_all.write(formatted_outline)
         f_all.write("\n\n")
 
         # Write content for each file
         for seq, original, md_filename, rel_path in markdown_files_info:
             file_path = os.path.join(project_root, rel_path)
-            markdown_content = process_file(file_path, project_root, masker, no_mask)
-            if not markdown_content:
+            processed_content = process_file(file_full_path, project_root, masker, no_mask)
+            if not processed_content:
                 continue
 
-            f_all.write(f"---\n## {md_filename} (from {rel_path})\n\n")
-            f_all.write(markdown_content)
+            file_header = f"---{output_formatter.file_extension}\n## {md_filename} (from {rel_path})\n\n"
+            f_all.write(file_header)
+
+            formatted_content = output_formatter.format(processed_content, os.path.basename(file_path), rel_path)
+            f_all.write(formatted_content)
             f_all.write("\n\n")
 
     print(f"Created single all-in-one file: {all_file_path}")
