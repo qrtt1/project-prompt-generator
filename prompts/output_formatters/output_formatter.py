@@ -1,9 +1,10 @@
 """
 Base class for output formatters.
 """
+import abc
 
 
-class OutputFormatter:
+class OutputFormatter(metaclass=abc.ABCMeta):
     name = "base"
     file_extension = "txt"
 
