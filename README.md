@@ -11,6 +11,7 @@ A command-line tool to convert your project's files into structured markdown doc
 - **Customizable Ignored Files:** 🛡️ Respects `.gitignore` and supports additional custom ignore patterns.
 - **Organized Output:** 📋 Generates an outline file that clearly lists all converted files.
 - **Sensitive Data Masking:** 🔒 Automatically detects and masks API keys, passwords, and other sensitive information (enabled by default).
+- **Event-Based Architecture:** 📡 Uses an event system to process files and handle output generation.
 
 ## Installation 🛠️
 
@@ -35,8 +36,8 @@ ppg gen
 
 This creates a `ppg_generated` directory containing:
 
-- `000_outline.md`: 🗺️ A table of contents for all generated markdown files.
-- Individual markdown files for each project file (e.g., `001_cli.py.md`, `002_README.md`, etc.).
+- Individual markdown files for each project file with a sequential numbering system (e.g., `001_cli.py.md`, `002_README.md.md`, etc.).
+- Each file includes both the original filename and its relative path in the project.
 
 ### Generate a Single All-in-One File
 
@@ -61,41 +62,20 @@ The tool automatically masks sensitive data by default. You can control this beh
 ```bash
 # Disable sensitive data masking
 ppg generate --no-mask
-
-# Add custom patterns for sensitive data detection
-ppg generate --add-pattern "your_custom_regex_pattern"
 ```
 
-Default patterns will detect common sensitive information like:
+Default patterns detect common sensitive information like:
 
 - API keys and tokens
 - Passwords
 - Database connection strings
 - AWS access keys
 - Generic secrets
+- PowerShell secure strings
 
-## Example Output Structure 🌳
+## Environment Variable Configuration 🔧
 
-### When using `ppg generate`:
-
-```
-ppg_generated/
-├── 000_outline.md
-├── 001_.gitignore.md
-├── 002_cli.py.md
-├── 003_prompts___init__.py.md
-└── 004_setup.py.md
-```
-
-### When using `ppg generate_all_in_one`:
-
-```
-./ppg_created_all.md.txt
-```
-
-### Environment Variable Configuration 🔧
-
-You can customize the output locations and ignored directories using environment variables:
+You can customize the output locations and ignored files using environment variables:
 
 ```bash
 # Change the output directory (default: ppg_generated)
@@ -106,15 +86,9 @@ ppg generate
 export PPG_OUTPUT_FILE=project_documentation.md
 ppg all
 
-# Define custom directories to ignore (comma-separated)
-export CUSTOM_IGNORE_DIRS="dir1,dir2,dir3"
+# Define custom ignore files (comma-separated)
+export PPG_IGNORE_FILES=".gitignore,.dockerignore"
 ppg generate
-
-# Use all together
-export PPG_OUTPUT_DIR=docs
-export PPG_OUTPUT_FILE=full_project.md
-export CUSTOM_IGNORE_DIRS="temp,cache"
-ppg all
 ```
 
 Advanced path features:
@@ -137,13 +111,6 @@ export PPG_OUTPUT_DIR=docs/markdown/generated
 export PPG_OUTPUT_FILE=reports/2025/q1/project_report.md
 ```
 
-These environment variables provide flexibility for:
-
-- Integration with automated workflows 🤖
-- Customizing output for different projects 📂
-- Directing output to specific documentation folders 📚
-- Ignoring specific directories from prompt generation 🙈
-
 ## Project Structure 📁
 
 ```
@@ -151,28 +118,29 @@ project-prompt-generator/
 ├── cli.py                     # Command-line interface
 ├── prompts/
 │   ├── __init__.py            # Package exports
-│   ├── generator.py           # Core generation functionality
+│   ├── events.py              # Event classes for file processing
 │   ├── file_processor.py      # File processing utilities
+│   ├── file_walker.py         # Directory traversal and file filtering
+│   ├── generator.py           # Core generation functionality
+│   ├── ignore_handler.py      # Handles .gitignore and custom ignores
+│   ├── language_mapping.py    # Maps file extensions to language hints
+│   ├── options.py             # Configuration options
+│   ├── output_handler.py      # Output handling for files/all-in-one
 │   └── sensitive_masker.py    # Sensitive data masking
+├── tests/
+│   └── test_sensitive_masker.py  # Tests for sensitive data masking
 ├── setup.py                   # Package configuration
 └── README.md                  # Documentation
 ```
 
 ## How it Works ⚙️
 
-1. The tool scans your project directory, respecting `.gitignore` and any custom ignore patterns specified via the `CUSTOM_IGNORE_DIRS` environment variable. 🔍
-2. Each file is converted into a markdown file with a header showing the filename and path, followed by its content enclosed in a code block with appropriate language highlighting. 📝
-3. Sensitive data is automatically detected and masked with asterisks (*) to protect your credentials. 🔒
-4. Depending on the command used, the tool generates either individual markdown files or a single consolidated file. 🧩
+1. The tool scans your project directory, respecting `.gitignore` and any custom ignore patterns. 🔍
+2. Each file is converted into a markdown format with a header showing the filename and path, followed by its content enclosed in a code block with appropriate language highlighting. 📝
+3. An event-based system handles file processing and output generation, making the code extensible. 🔄
+4. Sensitive data is automatically detected and masked with asterisks (*) to protect your credentials. 🔒
+5. Depending on the command used, the tool generates either individual markdown files or a single consolidated file. 🧩
 
 ## License 📄
 
 This project is licensed under the MIT License. 🎉
-
----
-
-## Additional Notes
-
-- This is a simple, experimental project created to assist with daily tasks.
-- If you need a more mature solution, consider exploring [Repomix](https://repomix.com/).
-- We intend to learn from Repomix's features and may integrate new ideas in future updates.

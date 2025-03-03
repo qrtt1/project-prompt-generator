@@ -119,3 +119,4 @@ __pycache__/
 venv/
 env/
 .envrc
+.pytest_cache

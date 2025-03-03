@@ -1,9 +1,10 @@
 import os
+from typing import Optional, Union
 
 import pathspec
 
 
-def load_gitignore_patterns(project_root):
+def build_ignores(project_root):
     """
     Loads gitignore patterns from multiple sources:
     1. .gitignore in the current working directory
@@ -16,7 +17,7 @@ def load_gitignore_patterns(project_root):
         pathspec.PathSpec: A PathSpec object containing all gitignore patterns.
                            Returns None if no gitignore files are found.
     """
-    patterns = []
+    patterns = ['.git', 'ppg_generated']
 
     # Load .gitignore from current working directory if it exists
     gitignore_path = os.path.join(project_root, ".gitignore")
@@ -28,7 +29,7 @@ def load_gitignore_patterns(project_root):
     # Load gitignore files specified in PPG_IGNORE_FILES
     ignore_files_str = os.environ.get("PPG_IGNORE_FILES")
     if ignore_files_str:
-        ignore_files = ignore_files_str.split(',')
+        ignore_files = ignore_files_str.split(",")
         for ignore_file in ignore_files:
             ignore_file = ignore_file.strip()  # Remove leading/trailing whitespace
             if os.path.exists(ignore_file):
@@ -39,6 +40,8 @@ def load_gitignore_patterns(project_root):
                 print(f"Warning: gitignore file not found: {ignore_file}")
 
     if patterns:
+        # Remove empty lines and strip whitespace
+        patterns = [p.strip() for p in patterns if p.strip()]
         return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
     else:
         return None

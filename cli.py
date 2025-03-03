@@ -1,8 +1,16 @@
+# cli.py
 import argparse
 import os
 import sys
 
-from prompts.generator import generate_individual_files, generate_single_file
+from prompts.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
+                            StartEvent)
+from prompts.file_walker import FileWalker
+from prompts.generator import generate
+from prompts.ignore_handler import build_ignores
+from prompts.options import Options
+from prompts.output_handler import (IndividualFilesOutputHandler,
+                                    SingleFileOutputHandler)
 
 
 def cli():
@@ -77,18 +85,23 @@ Output location can be customized with the PPG_OUTPUT_FILE environment variable.
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
     output_file = os.environ.get("PPG_OUTPUT_FILE", "ppg_created_all.md.txt")
 
-    # Execute the appropriate command
-    if not args.command:
-        parser.print_help()
-        return
+    project_root = os.getcwd()
+    ignore_spec = build_ignores(project_root)
+    file_walker = FileWalker(project_root, ignore_spec)
+    files_to_process = file_walker.get_files()
+
+    no_mask = getattr(args, 'no_mask', False)  # Get no_mask, default to False
+    options = Options(no_mask=no_mask, output_dir=output_dir, output_file=output_file)
 
     if args.command in ["generate", "g", "gen"]:
         print(f"Using output directory: {output_dir}")
-        generate_individual_files(args.no_mask)
+        output_handler = IndividualFilesOutputHandler(output_dir)
+        generate(files_to_process, options, output_handler)
     elif args.command in ["generate_all_in_one", "a", "all"]:
         print(f"Using output file: {output_file}")
-        generate_single_file(args.no_mask)
+        output_handler = SingleFileOutputHandler(output_file)
+        generate(files_to_process, options, output_handler)
 
 
 if __name__ == "__main__":
-    cli()  # Changed from main() to cli()
+    cli()
