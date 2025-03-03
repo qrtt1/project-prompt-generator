@@ -8,6 +8,7 @@ class OutputFormatter(metaclass=abc.ABCMeta):
     name = "base"
     file_extension = "txt"
 
+    @abc.abstractmethod
     def format(self, content, filename, rel_path):
         """
         Format the content.
@@ -21,3 +22,18 @@ class OutputFormatter(metaclass=abc.ABCMeta):
             str: The formatted content.
         """
         return content
+
+    def create_outline(self, markdown_files_info):
+        """
+        Create outline content from file info.
+
+        Args:
+            markdown_files_info (list): A list of tuples containing file info.
+
+        Returns:
+            str: The outline content.
+        """
+        outline_content = "## Outline\n\n"
+        for seq, filename, md_filename, rel_path in markdown_files_info:
+            outline_content += f"{seq}. [{filename}]({md_filename}) - {rel_path}\n"
+        return outline_content

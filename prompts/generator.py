@@ -6,12 +6,14 @@ Contains functionality for generating individual files and combined output.
 import os
 import re
 import shutil
+from dataclasses import dataclass
+from typing import List
 
 from .config_handler import expand_path_variables
 from .file_processor import create_outline, get_files_to_process, process_file
 from .file_utils import ensure_directory_exists
 from .sensitive_masker import DEFAULT_SENSITIVE_PATTERNS, SensitiveMasker
-
+from .types import FileEntry
 
 # Constants with environment variable overrides
 # Expand both ~ and environment variables in paths
@@ -55,7 +57,7 @@ def generate_individual_files(no_mask, output_formatter):
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
     masker = _create_masker(no_mask)
 
-    markdown_files_info = []
+    file_list: List[FileEntry] = []
     seq_counter = 1
 
     # Process each file
@@ -77,12 +79,14 @@ def generate_individual_files(no_mask, output_formatter):
         with open(md_filepath, "w", encoding="utf-8") as f:
             f.write(formatted_content)
 
-        markdown_files_info.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
+        # file_list.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
+        file_list.append(FileEntry(sequence=seq_counter, relative_path=rel_path, filename=file_full_path,
+                                   file_full_path=file_full_path))
         print(f"Converted {rel_path} to {output_formatter.name} as {md_filename}")
         seq_counter += 1
 
     # Create outline file
-    outline_content = create_outline(markdown_files_info)
+    outline_content = create_outline(file_list)
     outline_filename = f"000_outline.{output_formatter.file_extension}"
     outline_path = os.path.join(output_dir_path, outline_filename)
 
@@ -92,7 +96,7 @@ def generate_individual_files(no_mask, output_formatter):
         f.write(formatted_outline)
 
     print(f"Outline file created as {outline_filename}")
-    print(f"Generated {len(markdown_files_info)} individual files in {OUTPUT_DIR}/")
+    print(f"Generated {len(file_list)} individual files in {OUTPUT_DIR}/")
 
 
 def generate_single_file(no_mask, output_formatter):
@@ -103,7 +107,7 @@ def generate_single_file(no_mask, output_formatter):
     files_to_process = get_files_to_process(project_root, OUTPUT_DIR, SINGLE_OUTPUT_FILE)
     masker = _create_masker(no_mask)
 
-    markdown_files_info = []
+    file_list: List[FileEntry] = []
     seq_counter = 1
 
     # Process each file
@@ -115,15 +119,13 @@ def generate_single_file(no_mask, output_formatter):
 
         # Generate reference filename (not creating actual file)
         flat_rel_path = rel_path.replace(os.path.sep, "_")
-        seq_str = str(seq_counter).zfill(3)
-        md_filename = f"{seq_str}_{flat_rel_path}"
-
-        markdown_files_info.append((seq_str, os.path.basename(file_full_path), md_filename, rel_path))
+        file_list.append(FileEntry(sequence=seq_counter, relative_path=rel_path, filename=file_full_path,
+                                   file_full_path=file_full_path))
         print(f"Processed {rel_path}")
         seq_counter += 1
 
     # Create the outline
-    outline_content = create_outline(markdown_files_info)
+    outline_content = create_outline(file_list)
 
     # Create the all-in-one file
     all_file_path = SINGLE_OUTPUT_FILE
@@ -142,16 +144,17 @@ def generate_single_file(no_mask, output_formatter):
         f_all.write("\n\n")
 
         # Write content for each file
-        for seq, original, md_filename, rel_path in markdown_files_info:
-            file_path = os.path.join(project_root, rel_path)
-            processed_content = process_file(file_full_path, project_root, masker, no_mask)
+        for entry in file_list:
+            file_path = os.path.join(project_root, entry.relative_path)
+            processed_content = process_file(entry.file_full_path, project_root, masker, no_mask)
             if not processed_content:
                 continue
 
-            file_header = f"---{output_formatter.file_extension}\n## {md_filename} (from {rel_path})\n\n"
+            file_header = f"---{output_formatter.file_extension}\n## {entry.md_filename} (from {entry.relative_path})\n\n"
             f_all.write(file_header)
 
-            formatted_content = output_formatter.format(processed_content, os.path.basename(file_path), rel_path)
+            formatted_content = output_formatter.format(processed_content, os.path.basename(file_path),
+                                                        entry.relative_path)
             f_all.write(formatted_content)
             f_all.write("\n\n")
 

@@ -5,11 +5,13 @@ and creating markdown representations.
 """
 
 import os
+from typing import List
 
 import pathspec
 
 from .ignore_handler import load_gitignore_patterns
 from .language_mapping import EXTENSION_MAPPING
+from .types import FileEntry
 
 
 def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.md.txt"):
@@ -108,7 +110,7 @@ def process_file(file_full_path, project_root, masker, no_mask):
     return markdown_content
 
 
-def create_outline(markdown_files_info):
+def create_outline(files_info: List[FileEntry]):
     """
     Create outline content from file info
 
@@ -119,6 +121,6 @@ def create_outline(markdown_files_info):
         Outline content as a string
     """
     outline_lines = ["# Outline\n"]
-    for seq, original, md_filename, rel_path in markdown_files_info:
-        outline_lines.append(f"- {md_filename} (original: {original}, path: {rel_path})")
+    for entry in files_info:
+        outline_lines.append(f"- {entry.md_filename} (original: {entry.filename}, path: {entry.relative_path})")
     return "\n".join(outline_lines)
