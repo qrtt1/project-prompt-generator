@@ -1,6 +1,8 @@
 import json
 
-class JsonFormatter:
+from .output_formatter import OutputFormatter
+
+class JsonFormatter(OutputFormatter):
     """
     JSON Formatter that converts prompt content along with file metadata into JSON format.
     """
@@ -27,3 +29,22 @@ class JsonFormatter:
             "outputs": outputs
         }
         return json.dumps(aggregated, ensure_ascii=False, indent=2)
+
+    def create_outline(self, files_info):
+        """
+        Create outline content from file info for JSON format.
+
+        Args:
+            files_info: List of FileEntry objects with file information
+
+        Returns:
+            Outline content as a JSON string
+        """
+        outline_data = []
+        for entry in files_info:
+            outline_data.append({
+                "md_filename": entry.md_filename,
+                "original": entry.filename,
+                "path": entry.relative_path
+            })
+        return json.dumps(outline_data, ensure_ascii=False, indent=2)

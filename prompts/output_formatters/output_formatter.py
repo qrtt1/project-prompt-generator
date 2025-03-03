@@ -23,17 +23,15 @@ class OutputFormatter(metaclass=abc.ABCMeta):
         """
         return content
 
-    def create_outline(self, markdown_files_info):
+    @abc.abstractmethod
+    def create_outline(self, files_info):
         """
         Create outline content from file info.
 
         Args:
-            markdown_files_info (list): A list of tuples containing file info.
+            files_info (list): A list of FileEntry objects containing file info.
 
         Returns:
             str: The outline content.
         """
-        outline_content = "## Outline\n\n"
-        for seq, filename, md_filename, rel_path in markdown_files_info:
-            outline_content += f"{seq}. [{filename}]({md_filename}) - {rel_path}\n"
-        return outline_content
+        raise NotImplementedError

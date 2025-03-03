@@ -1,7 +1,6 @@
 """
 File processor module for handling file operations.
-Contains functionality for reading files, applying language highlighting,
-and creating markdown representations.
+Contains functionality for reading files and applying language highlighting.
 """
 
 import os
@@ -65,7 +64,7 @@ def get_files_to_process(project_root, output_dir, output_file="ppg_created_all.
     return sorted(files_to_process, key=lambda p: os.path.relpath(p, project_root))
 
 
-def process_file(file_full_path, project_root, masker, no_mask):
+def process_file(file_full_path, project_root, masker, no_mask, output_formatter):
     """
     Process a single file and generate its markdown representation
 
@@ -74,9 +73,10 @@ def process_file(file_full_path, project_root, masker, no_mask):
         project_root: Root directory of the project
         masker: SensitiveMasker instance
         no_mask: Flag to disable masking
+        output_formatter: OutputFormatter instance
 
     Returns:
-        Markdown content as a string, or None if processing failed
+        Content as a string, or None if processing failed
     """
     rel_path = os.path.relpath(file_full_path, project_root)
 
@@ -91,34 +91,4 @@ def process_file(file_full_path, project_root, masker, no_mask):
     if masker and not no_mask:
         file_content = masker.mask_content(file_content)
 
-    # Determine language hint based on file extension
-    _, ext = os.path.splitext(file_full_path)
-    lang = EXTENSION_MAPPING.get(ext.lower(), '')
-    code_block_start = f"```{lang}\n" if lang else "```\n"
-
-    # Create markdown representation
-    markdown_content = (
-        f"filename: {os.path.basename(file_full_path)}\n"
-        f"path: {rel_path}\n\n"
-        f"{code_block_start}"
-        f"{file_content}\n"
-        "```"
-    )
-
-    return markdown_content
-
-
-def create_outline(files_info: List[FileEntry]):
-    """
-    Create outline content from file info
-
-    Args:
-        markdown_files_info: List of tuples with file information
-
-    Returns:
-        Outline content as a string
-    """
-    outline_lines = ["# Outline\n"]
-    for entry in files_info:
-        outline_lines.append(f"- {entry.md_filename} (original: {entry.filename}, path: {entry.relative_path})")
-    return "\n".join(outline_lines)
+    return file_content

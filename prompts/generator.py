@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import List
 
 from .config_handler import expand_path_variables
-from .file_processor import create_outline, get_files_to_process, process_file
+from .file_processor import get_files_to_process, process_file
 from .file_utils import ensure_directory_exists
 from .sensitive_masker import DEFAULT_SENSITIVE_PATTERNS, SensitiveMasker
 from .types import FileEntry
@@ -64,14 +64,14 @@ def process_and_format_file(
     project_root: str,
     masker,
     no_mask: bool,
-    output_formatter,  # Remove type hint
+    output_formatter,
     output_dir_path: str,
 ) -> None:
     """
     Processes a single file, formats the content, and writes it to the output directory.
     """
     processed_content = process_file(
-        file_entry.file_full_path, project_root, masker, no_mask
+        file_entry.file_full_path, project_root, masker, no_mask, output_formatter  # Pass formatter
     )
     if not processed_content:
         print(f"Skipping {file_entry.relative_path} due to processing error.")
@@ -124,7 +124,7 @@ def generate_individual_files(no_mask, output_formatter):
 
 
     # Create outline file
-    outline_content = create_outline(file_list)
+    outline_content = output_formatter.create_outline(file_list)  # Use formatter
     outline_filename = f"000_outline.{output_formatter.file_extension}"
     outline_path = os.path.join(output_dir_path, outline_filename)
 
@@ -149,7 +149,7 @@ def generate_single_file(no_mask, output_formatter):
     file_list = collect_file_entries(project_root, files_to_process)
 
     # Create the outline
-    outline_content = create_outline(file_list)
+    outline_content = output_formatter.create_outline(file_list)  # Use formatter
 
     # Create the all-in-one file
     all_file_path = SINGLE_OUTPUT_FILE
@@ -170,7 +170,7 @@ def generate_single_file(no_mask, output_formatter):
         # Write content for each file
         for entry in file_list:
             #file_path = os.path.join(project_root, entry.relative_path) # Not required
-            processed_content = process_file(entry.file_full_path, project_root, masker, no_mask)
+            processed_content = process_file(entry.file_full_path, project_root, masker, no_mask, output_formatter)
             if not processed_content:
                 continue
 
