@@ -12,6 +12,18 @@ from prompts.output_handler import (IndividualFilesOutputHandler,
                                     SingleFileOutputHandler)
 
 
+def is_git_repository(path):
+    """
+    Check if a directory or any of its parent directories contains a .git directory.
+    """
+    current_path = os.path.abspath(path)
+    while current_path != os.path.dirname(current_path):  # Stop at the root directory
+        if os.path.exists(os.path.join(current_path, ".git")):
+            return True
+        current_path = os.path.dirname(current_path)
+    return False
+
+
 def cli():
     # Create the top-level parser with expanded help
     parser = argparse.ArgumentParser(
@@ -24,6 +36,7 @@ formatted markdown files for large language models.""",
 Examples:
   ppg              # Generate a single all-in-one file (default)
   ppg --split      # Generate individual markdown files
+  ppg --force      # Force execution outside of a git repository
 
 Environment Variables:
   PPG_OUTPUT_DIR           # Custom output directory (default: ppg_generated, used with --split)
@@ -48,8 +61,20 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         help="Generate individual markdown files instead of a single all-in-one file"
     )
 
+    # Add --force argument
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force execution outside of a git repository"
+    )
+
     # Parse arguments
     args = parser.parse_args()
+
+    # Check if it's a git repo
+    if not args.force and not is_git_repository(os.getcwd()):
+        print("Error: Not a git repository. Use --force to run anyway.")
+        sys.exit(1)
 
     # Determine output file and directory
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
