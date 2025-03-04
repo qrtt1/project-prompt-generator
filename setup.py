@@ -37,6 +37,7 @@ setup(
         "console_scripts": [
             "promg=cli:cli",
             "ppg=cli:cli",
+            "last-run=last_run:main",
         ],
     },
 )
