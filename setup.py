@@ -13,7 +13,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/qrtt1/project-prompt-generator",
     packages=find_packages(),
-    py_modules=["cli"],
+    py_modules=[],
     install_requires=[
         "pathspec"
     ],
@@ -35,9 +35,8 @@ setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "promg=cli:cli",
-            "ppg=cli:cli",
-            "last-run=last_run:main",
+            "ppg=cli.ppg:cli",
+            "last-run=cli.last_run:main",
         ],
     },
 )

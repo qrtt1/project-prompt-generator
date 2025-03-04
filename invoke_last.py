@@ -1,7 +1,8 @@
-import os
 import glob
-import subprocess
+import os
 import stat
+import subprocess
+
 
 def main():
     """

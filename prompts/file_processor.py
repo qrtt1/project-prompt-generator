@@ -5,6 +5,7 @@ Contains functionality for reading files and masking data.
 
 import os
 
+
 def process_file(file_full_path, project_root, masker, no_mask):
     """
     Process a single file and return its content and metadata.
