@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 from os.path import expanduser
 from typing import Callable
 
+from utils.language_mapping import EXTENSION_MAPPING
 from .events import Event
-from .language_mapping import EXTENSION_MAPPING
 
 
 class OutputHandler(ABC):

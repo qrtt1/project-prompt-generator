@@ -1,3 +1,4 @@
+
 import os
 
 from .events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,

@@ -5,10 +5,10 @@ import sys
 
 from prompts.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
                             StartEvent)
-from prompts.file_walker import FileWalker
+from utils.file_walker import FileWalker
 from prompts.generator import generate
-from prompts.ignore_handler import build_ignores
-from prompts.envrc_handler import update_envrc
+from utils.ignore_handler import build_ignores
+from utils.envrc_handler import update_envrc
 from prompts.options import Options
 from prompts.output_handler import (IndividualFilesOutputHandler,
                                     SingleFileOutputHandler)
