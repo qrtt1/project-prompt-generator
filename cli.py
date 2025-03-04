@@ -22,12 +22,12 @@ formatted markdown files for large language models.""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  ppg generate              # Generate a single all-in-one file (default)
-  ppg generate --split      # Generate individual markdown files
+  ppg              # Generate a single all-in-one file (default)
+  ppg --split      # Generate individual markdown files
 
 Environment Variables:
   PPG_OUTPUT_DIR           # Custom output directory (default: ppg_generated, used with --split)
-  PPG_OUTPUT_FILE          # Custom output filename (default: ppg_created_all.md.txt)
+  PPG_OUTPUT_FILE          # Custom output filename (default: project_docs.md)
   PPG_IGNORE_FILES         # Comma-separated list of .gitignore files
 
 For more information, visit: https://github.com/qrtt1/project-prompt-generator
@@ -48,25 +48,19 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         help="Generate individual markdown files instead of a single all-in-one file"
     )
 
-    # Add aliases for generate command
-    parser.add_argument(
-        "command",
-        nargs="?",
-        choices=["generate", "g"],
-        default="generate",
-        help=argparse.SUPPRESS  # Hide from help message
-    )
-
     # Parse arguments
     args = parser.parse_args()
 
-    # Handle aliases
-    if args.command == "g":
-        args.command = "generate"
-
-    # Show current environment configuration if requested
+    # Determine output file and directory
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
-    output_file = os.environ.get("PPG_OUTPUT_FILE", "ppg_created_all.md.txt")
+    output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
+
+    if args.split:
+        output_path = os.path.abspath(output_dir)
+    else:
+        output_path = os.path.abspath(output_file)
+
+    print(f"Outputting to: {output_path}")
 
     project_root = os.getcwd()
     ignore_spec = build_ignores(project_root)
@@ -77,11 +71,9 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
     options = Options(no_mask=no_mask, output_dir=output_dir, output_file=output_file)
 
     if args.split:
-        print(f"Using output directory: {output_dir}")
         output_handler = IndividualFilesOutputHandler(output_dir)
         generate(files_to_process, options, output_handler)
     else:
-        print(f"Using output file: {output_file}")
         output_handler = SingleFileOutputHandler(output_file)
         generate(files_to_process, options, output_handler)
 

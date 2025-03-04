@@ -103,7 +103,6 @@ class IndividualFilesOutputHandler(OutputHandler):
         filepath = os.path.join(self.output_dir, event.filename)
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(markdown_content)
-        print(f"Created file: {filepath}")
 
 
 class SingleFileOutputHandler(OutputHandler):
@@ -156,7 +155,6 @@ class SingleFileOutputHandler(OutputHandler):
         if event_name == "EndEvent":
             with open(expanduser(self.output_file), "w", encoding="utf-8") as f:
                 f.write(self.content)
-            print(f"Created single all-in-one file: {self.output_file}")
         else:
             if event_name in self._event_handlers:
                 for handler in self._event_handlers[event_name]:

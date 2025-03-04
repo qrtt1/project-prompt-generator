@@ -25,13 +25,10 @@ Navigate to your project's root directory and use the following command:
 
 ```bash
 # Generate a single all-in-one file (default)
-ppg generate
+ppg
 
 # Generate individual markdown files
-ppg generate --split
-
-# Aliases
-ppg g 
+ppg --split
 ```
 
 This creates either:
@@ -52,7 +49,7 @@ The tool automatically masks sensitive data by default. You can control this beh
 
 ```bash
 # Disable sensitive data masking
-ppg generate --no-mask
+ppg --no-mask
 ```
 
 Default patterns detect common sensitive information like:
@@ -71,15 +68,15 @@ You can customize the output locations and ignored files using environment varia
 ```bash
 # Change the output directory (default: ppg_generated, used with --split)
 export PPG_OUTPUT_DIR=custom_output_folder
-ppg generate --split
+ppg --split
 
-# Change the all-in-one output file name (default: ppg_created_all.md.txt)
+# Change the all-in-one output file name (default: project_docs.md)
 export PPG_OUTPUT_FILE=project_documentation.md
-ppg generate
+ppg
 
 # Define custom ignore files (comma-separated)
 export PPG_IGNORE_FILES=".gitignore,.dockerignore"
-ppg generate
+ppg
 ```
 
 Advanced path features:
