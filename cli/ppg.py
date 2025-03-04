@@ -1,3 +1,4 @@
+
 import argparse
 import os
 import sys
@@ -7,6 +8,7 @@ from prompts.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
 from prompts.file_walker import FileWalker
 from prompts.generator import generate
 from prompts.ignore_handler import build_ignores
+from prompts.envrc_handler import update_envrc
 from prompts.options import Options
 from prompts.output_handler import (IndividualFilesOutputHandler,
                                     SingleFileOutputHandler)
@@ -68,6 +70,13 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         help="Force execution outside of a git repository"
     )
 
+
+    parser.add_argument(
+        "--update-env",
+        action="store_true",
+        help="Update .envrc with PPG_OUTPUT_FILE and PPG_OUTPUT_DIR"
+    )
+
     # Parse arguments
     args = parser.parse_args()
 
@@ -78,6 +87,9 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
 
     # Determine output file and directory
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
+
+    if args.update_env:        update_envrc(os.getcwd())
+
     output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
 
     if args.split:
