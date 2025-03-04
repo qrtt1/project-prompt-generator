@@ -21,39 +21,30 @@ pip install .
 
 ## Usage 🚀
 
-Navigate to your project's root directory and use one of the following commands:
-
-### Generate Individual Markdown Files
+Navigate to your project's root directory and use the following command:
 
 ```bash
-# Full command
+# Generate a single all-in-one file (default)
 ppg generate
 
-# Aliases
-ppg g
-ppg gen
-```
-
-This creates a `ppg_generated` directory containing:
-
-- Individual markdown files for each project file with a sequential numbering system (e.g., `001_cli.py.md`, `002_README.md.md`, etc.).
-- Each file includes both the original filename and its relative path in the project.
-
-### Generate a Single All-in-One File
-
-```bash
-# Full command
-ppg generate_all_in_one
+# Generate individual markdown files
+ppg generate --split
 
 # Aliases
-ppg a
-ppg all
+ppg g 
 ```
 
-This creates a single file `ppg_created_all.md.txt` in the current directory containing:
+This creates either:
 
-- An outline listing all processed files.
-- The content of all files converted to markdown format.
+- A single file `ppg_created_all.md.txt` in the current directory containing:
+    - An outline listing all processed files.
+    - The content of all files converted to markdown format.
+
+Or, when using `--split`:
+
+- A `ppg_generated` directory containing:
+    - Individual markdown files for each project file with a sequential numbering system (e.g., `001_cli.py.md`, `002_README.md.md`, etc.).
+    - Each file includes both the original filename and its relative path in the project.
 
 ### Security Options
 
@@ -78,13 +69,13 @@ Default patterns detect common sensitive information like:
 You can customize the output locations and ignored files using environment variables:
 
 ```bash
-# Change the output directory (default: ppg_generated)
+# Change the output directory (default: ppg_generated, used with --split)
 export PPG_OUTPUT_DIR=custom_output_folder
-ppg generate
+ppg generate --split
 
 # Change the all-in-one output file name (default: ppg_created_all.md.txt)
 export PPG_OUTPUT_FILE=project_documentation.md
-ppg all
+ppg generate
 
 # Define custom ignore files (comma-separated)
 export PPG_IGNORE_FILES=".gitignore,.dockerignore"

@@ -4,6 +4,7 @@ from os.path import expanduser
 from typing import Callable
 
 from .events import Event
+from .language_mapping import EXTENSION_MAPPING
 
 
 class OutputHandler(ABC):
@@ -35,6 +36,35 @@ class OutputHandler(ABC):
         """
         pass
 
+    def _create_markdown_content(self, file_data):
+        """
+        Create markdown representation from file data.
+
+        Args:
+            file_data (dict): Dictionary containing file content, relative path, filename, and extension.
+
+        Returns:
+            str: Markdown content as a string.
+        """
+        filename = file_data["filename"]
+        rel_path = file_data["rel_path"]
+        file_content = file_data["content"]
+        ext = file_data["ext"]
+
+        lang = EXTENSION_MAPPING.get(ext, '')
+        code_block_start = f"```{lang}\n" if lang else "```\n"
+
+        markdown_content = (
+            "## file description\n\n"
+            f"filename: {filename}\n"
+            f"path: {rel_path}\n\n"
+            "## contenxt\n\n"
+            f"{code_block_start}"
+            f"{file_content}\n"
+            "```"
+        )
+        return markdown_content
+
 
 class IndividualFilesOutputHandler(OutputHandler):
     """
@@ -63,11 +93,16 @@ class IndividualFilesOutputHandler(OutputHandler):
         pass
 
     def _handle_file_processed(self, event):
-        filename = event.filename
-        content = event.content
-        filepath = os.path.join(self.output_dir, filename)
+        file_data = {
+            "filename": event.filename,
+            "rel_path": event.relative_path,
+            "content": event.content,
+            "ext": os.path.splitext(event.filename)[1].lower()  # Extract extension
+        }
+        markdown_content = self._create_markdown_content(file_data)
+        filepath = os.path.join(self.output_dir, event.filename)
         with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(markdown_content)
         print(f"Created file: {filepath}")
 
 
@@ -104,8 +139,14 @@ class SingleFileOutputHandler(OutputHandler):
         self.content += event.content + "\n\n"
 
     def _handle_file_processed(self, event):
-        self.content += f"---\n## {event.filename} (from {event.relative_path})\n\n"
-        self.content += event.content + "\n\n"
+        file_data = {
+            "filename": event.filename,
+            "rel_path": event.relative_path,
+            "content": event.content,
+            "ext": os.path.splitext(event.filename)[1].lower()  # Extract extension
+        }
+        markdown_content = self._create_markdown_content(file_data)
+        self.content += f"---\n" + markdown_content + "\n\n"
 
     def fire_event(self, event: Event):
         """

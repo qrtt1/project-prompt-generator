@@ -35,22 +35,21 @@ def generate(files_to_process, options: Options, output_handler):
         seq_counter = 1
 
         for file_entry in files_to_process:
-            rel_path = file_entry.relative_path
-            markdown_content = process_file(file_entry.full_path, os.getcwd(), masker, options.no_mask)
-            if not markdown_content:
+            file_data = process_file(file_entry.full_path, os.getcwd(), masker, options.no_mask)
+            if not file_data:
                 continue
 
             # Generate reference filename (not creating actual file)
-            flat_rel_path = rel_path.replace(os.path.sep, "_")
+            flat_rel_path = file_entry.relative_path.replace(os.path.sep, "_")
             seq_str = str(seq_counter).zfill(3)
             md_filename = f"{seq_str}_{flat_rel_path}.md"
 
-            markdown_files_info.append((seq_str, file_entry.filename, md_filename, rel_path))
+            markdown_files_info.append((seq_str, file_entry.filename, md_filename, file_entry.relative_path))
 
-            event = FileProcessedEvent(filename=md_filename, relative_path=rel_path, content=markdown_content)
+            event = FileProcessedEvent(filename=md_filename, relative_path=file_entry.relative_path, content=file_data["content"])
             output_handler.fire_event(event)
-            output_handler.write(md_filename, rel_path, markdown_content)
-            print(f"Processed {rel_path}")
+            output_handler.write(md_filename, file_entry.relative_path, file_data["content"])
+            print(f"Processed {file_entry.relative_path}")
             seq_counter += 1
 
         outline_content = create_outline(markdown_files_info)

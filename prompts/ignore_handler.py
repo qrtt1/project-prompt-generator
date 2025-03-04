@@ -17,7 +17,7 @@ def build_ignores(project_root):
         pathspec.PathSpec: A PathSpec object containing all gitignore patterns.
                            Returns None if no gitignore files are found.
     """
-    patterns = ['.git', 'ppg_generated']
+    patterns = ['.git', 'ppg_generated', 'ppg_created_all.md.txt']
 
     # Load .gitignore from current working directory if it exists
     gitignore_path = os.path.join(project_root, ".gitignore")

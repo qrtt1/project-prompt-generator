@@ -1,17 +1,13 @@
 """
 File processor module for handling file operations.
-Contains functionality for reading files, applying language highlighting,
-and creating markdown representations.
+Contains functionality for reading files and masking data.
 """
 
 import os
 
-from .language_mapping import EXTENSION_MAPPING
-
-
 def process_file(file_full_path, project_root, masker, no_mask):
     """
-    Process a single file and generate its markdown representation
+    Process a single file and return its content and metadata.
 
     Args:
         file_full_path: Path to the file to process
@@ -20,9 +16,11 @@ def process_file(file_full_path, project_root, masker, no_mask):
         no_mask: Flag to disable masking
 
     Returns:
-        Markdown content as a string, or None if processing failed
+        A dictionary containing file content, relative path, and file extension,
+        or None if processing failed.
     """
     rel_path = os.path.relpath(file_full_path, project_root)
+    filename = os.path.basename(file_full_path)
 
     try:
         with open(file_full_path, "r", encoding="utf-8") as f:
@@ -37,21 +35,14 @@ def process_file(file_full_path, project_root, masker, no_mask):
 
     # Determine language hint based on file extension
     _, ext = os.path.splitext(file_full_path)
-    lang = EXTENSION_MAPPING.get(ext.lower(), '')
-    code_block_start = f"```{lang}\n" if lang else "```\n"
+    ext = ext.lower()
 
-    # Create markdown representation
-    markdown_content = (
-        "## file description\n\n"
-        f"filename: {os.path.basename(file_full_path)}\n"
-        f"path: {rel_path}\n\n"
-        "## contenxt\n\n"
-        f"{code_block_start}"
-        f"{file_content}\n"
-        "```"
-    )
-
-    return markdown_content
+    return {
+        "content": file_content,
+        "rel_path": rel_path,
+        "filename": filename,
+        "ext": ext
+    }
 
 
 def create_outline(markdown_files_info):
