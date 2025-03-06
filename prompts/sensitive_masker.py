@@ -8,7 +8,7 @@ from typing import List, Optional, Dict
 import logging
 
 # Configure logging (optional, can be enabled via CLI or env var)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 # Default sensitive data patterns with improved coverage
