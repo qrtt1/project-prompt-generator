@@ -31,13 +31,6 @@ class OutputHandler(ABC):
             for handler in self._event_handlers[event_name]:
                 handler(event)
 
-    @abstractmethod
-    def write(self, filename: str, relative_path: str, content: str):
-        """
-        Write content to the output.
-        """
-        pass
-
     def _create_markdown_content(self, file_data):
         """
         Create markdown representation from file data.
@@ -85,15 +78,6 @@ class IndividualFilesOutputHandler(OutputHandler):
         os.makedirs(self.output_dir, exist_ok=True)
         self.on("FileProcessedEvent", self._handle_file_processed)
 
-    def write(self, filename: str, relative_path: str, content: str):
-        """
-        Write content to the file.
-
-        Args:
-            content (str): The content to write.
-        """
-        pass
-
     def _handle_file_processed(self, event):
         file_data = {
             "filename": event.filename,
@@ -124,15 +108,6 @@ class SingleFileOutputHandler(OutputHandler):
         self.content = ""
         self.on("OutlineCreatedEvent", self._handle_outline_created)
         self.on("FileProcessedEvent", self._handle_file_processed)
-
-    def write(self, filename: str, relative_path: str, content: str):
-        """
-        Write content to the output file.
-
-        Args:
-            content (str): The content to write.
-        """
-        pass
 
     def _handle_outline_created(self, event):
         self.content += "# All Markdown Content\n\n"
@@ -188,15 +163,6 @@ class JSONOutputHandler(OutputHandler):
         }
         self.on("OutlineCreatedEvent", self._handle_outline_created)
         self.on("FileProcessedEvent", self._handle_file_processed)
-
-    def write(self, filename: str, relative_path: str, content: str):
-        """
-        Write content to the output file.
-
-        Args:
-            content (str): The content to write.
-        """
-        pass
 
     def _handle_outline_created(self, event):
         # Parse the outline content to create structured data
