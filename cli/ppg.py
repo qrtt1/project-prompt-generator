@@ -87,10 +87,14 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
 
     # Determine output file and directory
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
-
-    if args.update_env:        update_envrc(os.getcwd())
-
     output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
+    
+    # Expand ~ to user's home directory
+    output_dir = os.path.expanduser(output_dir)
+    output_file = os.path.expanduser(output_file)
+
+    if args.update_env:        
+        update_envrc(os.getcwd())
 
     if args.split:
         output_path = os.path.abspath(output_dir)

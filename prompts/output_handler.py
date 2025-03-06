@@ -79,8 +79,8 @@ class IndividualFilesOutputHandler(OutputHandler):
             output_dir (str): The directory to write the files to.
         """
         super().__init__()
-        self.output_dir = output_dir
-        os.makedirs(output_dir, exist_ok=True)
+        self.output_dir = expanduser(output_dir)
+        os.makedirs(self.output_dir, exist_ok=True)
         self.on("FileProcessedEvent", self._handle_file_processed)
 
     def write(self, filename: str, relative_path: str, content: str):
