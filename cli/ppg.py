@@ -8,7 +8,7 @@ from utils.file_walker import FileWalker
 from prompts.generator import generate
 from utils.ignore_handler import build_ignores
 from utils.envrc_handler import update_envrc
-from prompts.options import Options, OutputFormat
+from prompts.options import Options, OutputFormat, JSONFormat
 from prompts.output_handler import (IndividualFilesOutputHandler,
                                     SingleFileOutputHandler,
                                     JSONOutputHandler)
@@ -39,7 +39,8 @@ Examples:
   ppg              # Generate a single all-in-one file (default)
   ppg --split      # Generate individual markdown files
   ppg --force      # Force execution outside of a git repository
-  ppg --json       # Generate JSON output
+  ppg --json       # Generate JSON output (compact format)
+  ppg --json-lines # Generate JSON output with content split into lines
   ppg --update-env # Update .envrc with output paths and exit
 
 Environment Variables:
@@ -80,6 +81,13 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         help="Generate JSON output instead of markdown"
     )
 
+    # Add --json-lines argument
+    parser.add_argument(
+        "--json-lines",
+        action="store_true",
+        help="Generate JSON output with content split into lines"
+    )
+
     parser.add_argument(
         "--update-env",
         action="store_true",
@@ -111,7 +119,7 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
 
     if args.split:
         output_path = os.path.abspath(output_dir)
-    elif args.json:
+    elif args.json or args.json_lines:
         output_path = os.path.abspath(json_output_file)
     else:
         output_path = os.path.abspath(output_file)
@@ -128,14 +136,15 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         no_mask=no_mask,
         output_dir=output_dir,
         output_file=output_file,
-        output_format=OutputFormat.JSON if args.json else OutputFormat.MARKDOWN,
-        json_output_file=json_output_file
+        output_format=OutputFormat.JSON if (args.json or args.json_lines) else OutputFormat.MARKDOWN,
+        json_output_file=json_output_file,
+        json_format=JSONFormat.SPLIT if args.json_lines else JSONFormat.COMPACT
     )
 
     if args.split:
         output_handler = IndividualFilesOutputHandler(output_dir)
-    elif args.json:
-        output_handler = JSONOutputHandler(json_output_file)
+    elif args.json or args.json_lines:
+        output_handler = JSONOutputHandler(json_output_file, options.json_format)
     else:
         output_handler = SingleFileOutputHandler(output_file)
 

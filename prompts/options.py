@@ -7,6 +7,11 @@ class OutputFormat(Enum):
     JSON = "json"
 
 
+class JSONFormat(Enum):
+    COMPACT = "compact"  # Original format with content as single string
+    SPLIT = "split"      # New format with content split into lines
+
+
 @dataclass
 class Options:
     no_mask: bool = False
@@ -14,3 +19,4 @@ class Options:
     output_file: str = "ppg_created_all.md.txt"
     output_format: OutputFormat = OutputFormat.MARKDOWN
     json_output_file: str = "project_data.json"
+    json_format: JSONFormat = JSONFormat.COMPACT
