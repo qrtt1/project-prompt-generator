@@ -5,6 +5,7 @@ from enum import Enum
 class OutputFormat(Enum):
     MARKDOWN = "markdown"
     JSON = "json"
+    XML = "xml"  # 新增 XML 格式
 
 
 class JSONFormat(Enum):
@@ -20,3 +21,4 @@ class Options:
     output_format: OutputFormat = OutputFormat.MARKDOWN
     json_output_file: str = "project_data.json"
     json_format: JSONFormat = JSONFormat.COMPACT
+    xml_output_file: str = "project_data.xml"  # 新增 XML 輸出檔案預設值

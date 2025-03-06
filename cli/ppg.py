@@ -2,16 +2,14 @@ import argparse
 import os
 import sys
 
-from prompts.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
-                            StartEvent)
+from prompts.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent, StartEvent)
 from utils.file_walker import FileWalker
 from prompts.generator import generate
 from utils.ignore_handler import build_ignores
 from utils.envrc_handler import update_envrc
 from prompts.options import Options, OutputFormat, JSONFormat
-from prompts.output_handler import (IndividualFilesOutputHandler,
-                                    SingleFileOutputHandler,
-                                    JSONOutputHandler)
+from prompts.output_handler import (IndividualFilesOutputHandler, SingleFileOutputHandler,
+                                    JSONOutputHandler, XMLOutputHandler)
 
 
 def is_git_repository(path):
@@ -41,6 +39,7 @@ Examples:
   ppg --force      # Force execution outside of a git repository
   ppg --json       # Generate JSON output (compact format)
   ppg --json-lines # Generate JSON output with content split into lines
+  ppg --xml        # Generate XML output
   ppg --update-env # Update .envrc with output paths and exit
 
 Environment Variables:
@@ -60,32 +59,34 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         help="Disable sensitive data masking (default: enabled)"
     )
 
-    # Add --split argument
     parser.add_argument(
         "--split",
         action="store_true",
         help="Generate individual markdown files instead of a single all-in-one file"
     )
 
-    # Add --force argument
     parser.add_argument(
         "--force",
         action="store_true",
         help="Force execution outside of a git repository"
     )
 
-    # Add --json argument
     parser.add_argument(
         "--json",
         action="store_true",
         help="Generate JSON output instead of markdown"
     )
 
-    # Add --json-lines argument
     parser.add_argument(
         "--json-lines",
         action="store_true",
         help="Generate JSON output with content split into lines"
+    )
+
+    parser.add_argument(
+        "--xml",
+        action="store_true",
+        help="Generate XML output instead of markdown"  # 新增 XML 選項
     )
 
     parser.add_argument(
@@ -111,16 +112,19 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
     output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
     json_output_file = os.environ.get("PPG_JSON_OUTPUT_FILE", "project_data.json")
-    
-    # Expand ~ to user's home directory
+    xml_output_file = os.environ.get("PPG_XML_OUTPUT_FILE", "project_data.xml")  # 新增 XML 輸出檔案
+
     output_dir = os.path.expanduser(output_dir)
     output_file = os.path.expanduser(output_file)
     json_output_file = os.path.expanduser(json_output_file)
+    xml_output_file = os.path.expanduser(xml_output_file)
 
     if args.split:
         output_path = os.path.abspath(output_dir)
     elif args.json or args.json_lines:
         output_path = os.path.abspath(json_output_file)
+    elif args.xml:
+        output_path = os.path.abspath(xml_output_file)
     else:
         output_path = os.path.abspath(output_file)
 
@@ -136,15 +140,18 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         no_mask=no_mask,
         output_dir=output_dir,
         output_file=output_file,
-        output_format=OutputFormat.JSON if (args.json or args.json_lines) else OutputFormat.MARKDOWN,
+        output_format=OutputFormat.XML if args.xml else (OutputFormat.JSON if (args.json or args.json_lines) else OutputFormat.MARKDOWN),
         json_output_file=json_output_file,
-        json_format=JSONFormat.SPLIT if args.json_lines else JSONFormat.COMPACT
+        json_format=JSONFormat.SPLIT if args.json_lines else JSONFormat.COMPACT,
+        xml_output_file=xml_output_file
     )
 
     if args.split:
         output_handler = IndividualFilesOutputHandler(output_dir)
     elif args.json or args.json_lines:
         output_handler = JSONOutputHandler(json_output_file, options.json_format)
+    elif args.xml:
+        output_handler = XMLOutputHandler(xml_output_file)  # 使用 XML 輸出處理
     else:
         output_handler = SingleFileOutputHandler(output_file)
 
