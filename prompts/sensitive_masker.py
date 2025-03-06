@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Default sensitive data patterns with improved coverage
 DEFAULT_SENSITIVE_PATTERNS = [
     # API Keys and Tokens (e.g., api_key="abc123", API_TOKEN=xyz)
-    (r'(?i)(api[_-]?key|apikey|api[_-]?token|access[_-]?token|bearer)[\s]*[=:]\s*["\'`]?(?:[^"\'`\s]{16,})["\'`]?',
+    (r'(?i)(api[_-]?key|apikey|api[_-]?token|access[_-]?token|bearer)[\s]*[=:]\s*["\'`]?(?:[^"\'`\s]{6,})["\'`]?',
      "API keys or tokens"),
     # Passwords with quotes (e.g., password="secret123")
     (r'(?i)(password|pwd|pass)[\s]*[=:]\s*["\'`]([^"\'`\s]{6,})["\'`]',
@@ -29,7 +29,7 @@ DEFAULT_SENSITIVE_PATTERNS = [
     (r'AKIA[0-9A-Z]{16}',
      "AWS access keys"),
     # Generic secrets (e.g., secret_key="xyz", AUTH_TOKEN=abc)
-    (r'(?i)(secret|auth)[_-]?(key|token|id|secret)[\s]*[=:]\s*["\'`]?(?:[^"\'`\s]{16,})["\'`]?',
+    (r'(?i)(secret|auth)[_-]?(key|token|id|secret)[\s]*[=:]\s*["\'`]?(?:[^"\'`\s]{6,})["\'`]?',
      "Generic secrets"),
     # PowerShell ConvertTo-SecureString (e.g., ConvertTo-SecureString "pass" -AsPlainText)
     (r'(?i)ConvertTo-SecureString\s+(["\'`]).*?\1\s+-AsPlainText',
@@ -111,17 +111,19 @@ class SensitiveMasker:
 
                 # Handle key-value pairs (both quoted and unquoted)
                 if '=' in full_match:
-                    # Split into key and value parts
-                    parts = full_match.split('=', 1)
-                    if len(parts) == 2:
-                        key_part = parts[0].rstrip()  # Remove trailing whitespace
-                        value_part = parts[1].strip('"\'`')  # Remove quotes if present
-                        # Check if the original had quotes
-                        if parts[1].startswith('"') or parts[1].startswith("'") or parts[1].startswith('`'):
-                            quote = parts[1][0]
-                            return f"{key_part}={quote}{'*' * len(value_part)}{quote}"
+                    # Use regex to split while preserving spacing and quotes
+                    key_value_match = re.match(r'^(.*?)(\s*=)(\s*["\'`]?)(.*?)(["\'`]?\s*)$', full_match)
+                    if key_value_match:
+                        key_part = key_value_match.group(1)  # e.g., "password"
+                        equals_part = key_value_match.group(2)  # e.g., " ="
+                        quote_prefix = key_value_match.group(3)  # e.g., " "
+                        value_part = key_value_match.group(4)  # e.g., "supersecret"
+                        quote_suffix = key_value_match.group(5)  # e.g., ""
+                        if quote_prefix.strip() and quote_prefix.strip() in '"\'`':
+                            quote = quote_prefix.strip()
+                            return f"{key_part}{equals_part}{quote}{'*' * len(value_part)}{quote}"
                         else:
-                            return f"{key_part}={'*' * len(value_part)}"
+                            return f"{key_part}{equals_part}{'*' * len(value_part)}"
 
                 # Default: mask the entire match
                 masked_count += 1
