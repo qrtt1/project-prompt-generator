@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import sys
@@ -9,9 +8,10 @@ from utils.file_walker import FileWalker
 from prompts.generator import generate
 from utils.ignore_handler import build_ignores
 from utils.envrc_handler import update_envrc
-from prompts.options import Options
+from prompts.options import Options, OutputFormat
 from prompts.output_handler import (IndividualFilesOutputHandler,
-                                    SingleFileOutputHandler)
+                                    SingleFileOutputHandler,
+                                    JSONOutputHandler)
 
 
 def is_git_repository(path):
@@ -39,11 +39,14 @@ Examples:
   ppg              # Generate a single all-in-one file (default)
   ppg --split      # Generate individual markdown files
   ppg --force      # Force execution outside of a git repository
+  ppg --json       # Generate JSON output
+  ppg --update-env # Update .envrc with output paths and exit
 
 Environment Variables:
   PPG_OUTPUT_DIR           # Custom output directory (default: ppg_generated, used with --split)
   PPG_OUTPUT_FILE          # Custom output filename (default: project_docs.md)
   PPG_IGNORE_FILES         # Comma-separated list of .gitignore files
+  PPG_JSON_OUTPUT_FILE     # Custom JSON output filename (default: project_data.json)
 
 For more information, visit: https://github.com/qrtt1/project-prompt-generator
 """
@@ -70,15 +73,26 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         help="Force execution outside of a git repository"
     )
 
+    # Add --json argument
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Generate JSON output instead of markdown"
+    )
 
     parser.add_argument(
         "--update-env",
         action="store_true",
-        help="Update .envrc with PPG_OUTPUT_FILE and PPG_OUTPUT_DIR"
+        help="Update .envrc with output paths and exit"
     )
 
     # Parse arguments
     args = parser.parse_args()
+
+    # If --update-env is used, just update .envrc and exit
+    if args.update_env:
+        update_envrc(os.getcwd())
+        return
 
     # Check if it's a git repo
     if not args.force and not is_git_repository(os.getcwd()):
@@ -88,16 +102,17 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
     # Determine output file and directory
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
     output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
+    json_output_file = os.environ.get("PPG_JSON_OUTPUT_FILE", "project_data.json")
     
     # Expand ~ to user's home directory
     output_dir = os.path.expanduser(output_dir)
     output_file = os.path.expanduser(output_file)
-
-    if args.update_env:        
-        update_envrc(os.getcwd())
+    json_output_file = os.path.expanduser(json_output_file)
 
     if args.split:
         output_path = os.path.abspath(output_dir)
+    elif args.json:
+        output_path = os.path.abspath(json_output_file)
     else:
         output_path = os.path.abspath(output_file)
 
@@ -109,14 +124,22 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
     files_to_process = file_walker.get_files()
 
     no_mask = args.no_mask
-    options = Options(no_mask=no_mask, output_dir=output_dir, output_file=output_file)
+    options = Options(
+        no_mask=no_mask,
+        output_dir=output_dir,
+        output_file=output_file,
+        output_format=OutputFormat.JSON if args.json else OutputFormat.MARKDOWN,
+        json_output_file=json_output_file
+    )
 
     if args.split:
         output_handler = IndividualFilesOutputHandler(output_dir)
-        generate(files_to_process, options, output_handler)
+    elif args.json:
+        output_handler = JSONOutputHandler(json_output_file)
     else:
         output_handler = SingleFileOutputHandler(output_file)
-        generate(files_to_process, options, output_handler)
+
+    generate(files_to_process, options, output_handler)
 
 
 if __name__ == "__main__":

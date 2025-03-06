@@ -1,13 +1,13 @@
-
 import os
 
 def update_envrc(cwd):
     """
-    Updates the .envrc file with PPG_OUTPUT_FILE and PPG_OUTPUT_DIR variables.
+    Updates the .envrc file with PPG_OUTPUT_FILE, PPG_OUTPUT_DIR, and PPG_JSON_OUTPUT_FILE variables.
     """
     envrc_path = os.path.join(cwd, ".envrc")
     output_file_line = f'export PPG_OUTPUT_FILE="~/Downloads/$(basename $PWD).txt"\n'
     output_dir_line = f'export PPG_OUTPUT_DIR="~/Downloads/$(basename $PWD)"\n'
+    json_output_file_line = f'export PPG_JSON_OUTPUT_FILE="~/Downloads/$(basename $PWD).json"\n'
 
     # Read existing .envrc to avoid duplicates
     existing_lines = []
@@ -21,7 +21,9 @@ def update_envrc(cwd):
         new_lines.append(output_file_line)
     if not any(output_dir_line in line for line in existing_lines):
         new_lines.append(output_dir_line)
+    if not any(json_output_file_line in line for line in existing_lines):
+        new_lines.append(json_output_file_line)
 
     with open(envrc_path, "a") as f:
         f.writelines(new_lines)
-    print(f"Updated {envrc_path} with PPG_OUTPUT_FILE and PPG_OUTPUT_DIR")
+    print(f"Updated {envrc_path} with PPG_OUTPUT_FILE, PPG_OUTPUT_DIR, and PPG_JSON_OUTPUT_FILE")
