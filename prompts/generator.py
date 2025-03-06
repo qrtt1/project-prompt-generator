@@ -49,7 +49,6 @@ def generate(files_to_process, options: Options, output_handler):
 
             event = FileProcessedEvent(filename=md_filename, relative_path=file_entry.relative_path, content=file_data["content"])
             output_handler.fire_event(event)
-            output_handler.write(md_filename, file_entry.relative_path, file_data["content"])
             print(f"Processed {file_entry.relative_path}")
             seq_counter += 1
 
@@ -57,7 +56,6 @@ def generate(files_to_process, options: Options, output_handler):
 
         event = OutlineCreatedEvent(content=outline_content)
         output_handler.fire_event(event)
-        output_handler.write("all", "all", outline_content)
 
     finally:
         output_handler.fire_event(EndEvent(message="Processing completed"))
