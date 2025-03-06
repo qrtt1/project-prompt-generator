@@ -4,7 +4,7 @@ A command-line tool to convert your project's files into structured markdown doc
 
 ## Features 🌟
 
-- **Flexible Output Options:** 🔀 Generate individual markdown files or a single consolidated file.
+- **Flexible Output Options:** 🔀 Generate individual markdown files, a single consolidated file, or JSON output.
 - **Automatic Markdown Conversion:** 🔄 Converts all project files (excluding those in `.gitignore`) into individual markdown files.
 - **Structured Output:** 📂 Option to create an all-in-one file that includes an outline and the content of all converted files for easy use with LLMs.
 - **Code Highlighting:** 🌈 Automatically detects file extensions and applies proper markdown code highlighting.
@@ -12,6 +12,7 @@ A command-line tool to convert your project's files into structured markdown doc
 - **Organized Output:** 📋 Generates an outline file that clearly lists all converted files.
 - **Sensitive Data Masking:** 🔒 Automatically detects and masks API keys, passwords, and other sensitive information (enabled by default).
 - **Event-Based Architecture:** 📡 Uses an event system to process files and handle output generation.
+- **JSON Output Formats:** 📊 Supports both compact and line-split JSON formats for different use cases.
 
 ## Installation 🛠️
 
@@ -29,6 +30,12 @@ ppg
 
 # Generate individual markdown files
 ppg --split
+
+# Generate JSON output (compact format)
+ppg --json
+
+# Generate JSON output with content split into lines
+ppg --json-lines
 ```
 
 This creates either:
@@ -42,6 +49,14 @@ Or, when using `--split`:
 - A `ppg_generated` directory containing:
     - Individual markdown files for each project file with a sequential numbering system (e.g., `001_cli.py.md`, `002_README.md.md`, etc.).
     - Each file includes both the original filename and its relative path in the project.
+
+Or, when using `--json` or `--json-lines`:
+
+- A JSON file (default: `project_data.json`) containing:
+    - An outline of all processed files
+    - File contents in either:
+        - Compact format (with `--json`): Content as single strings
+        - Line-split format (with `--json-lines`): Content split into arrays of lines
 
 ### Security Options
 
@@ -63,41 +78,21 @@ Default patterns detect common sensitive information like:
 
 ## Environment Variable Configuration 🔧
 
-You can customize the output locations and ignored files using environment variables:
+You can customize the output locations using the `--update-env` option, which will automatically update your `.envrc` file with the appropriate environment variables:
 
 ```bash
-# Change the output directory (default: ppg_generated, used with --split)
-export PPG_OUTPUT_DIR=custom_output_folder
-ppg --split
-
-# Change the all-in-one output file name (default: project_docs.md)
-export PPG_OUTPUT_FILE=project_documentation.md
-ppg
-
-# Define custom ignore files (comma-separated)
-export PPG_IGNORE_FILES=".gitignore,.dockerignore"
-ppg
+# Update .envrc with default output paths
+ppg --update-env
 ```
 
-Advanced path features:
+This will add the following environment variables to your `.envrc` file:
+- `PPG_OUTPUT_DIR`: Directory for split markdown files
+- `PPG_OUTPUT_FILE`: File for consolidated markdown output
+- `PPG_JSON_OUTPUT_FILE`: File for JSON output
 
-```bash
-# Use home directory paths with ~
-export PPG_OUTPUT_DIR=~/documents/project_docs
-export PPG_OUTPUT_FILE=~/documents/project_docs/full_docs.md
+The paths will be automatically configured to use your Downloads directory with the current project name. You can then modify these paths in the `.envrc` file if needed.
 
-# Use shell environment variables
-export PPG_OUTPUT_DIR=$HOME/documents/project_docs
-export PPG_OUTPUT_FILE=${HOME}/documents/project_docs/full_docs.md
-
-# Use absolute paths
-export PPG_OUTPUT_DIR=/var/www/docs/project
-export PPG_OUTPUT_FILE=/shared/documents/project_output.md
-
-# Use nested paths that don't exist yet (directories will be created automatically)
-export PPG_OUTPUT_DIR=docs/markdown/generated
-export PPG_OUTPUT_FILE=reports/2025/q1/project_report.md
-```
+Note: Make sure you have `direnv` installed and configured to use the `.envrc` file.
 
 ## Project Structure 📁
 
@@ -127,7 +122,7 @@ project-prompt-generator/
 2. Each file is converted into a markdown format with a header showing the filename and path, followed by its content enclosed in a code block with appropriate language highlighting. 📝
 3. An event-based system handles file processing and output generation, making the code extensible. 🔄
 4. Sensitive data is automatically detected and masked with asterisks (*) to protect your credentials. 🔒
-5. Depending on the command used, the tool generates either individual markdown files or a single consolidated file. 🧩
+5. Depending on the command used, the tool generates either individual markdown files, a single consolidated file, or JSON output. 🧩
 
 ## License 📄
 
