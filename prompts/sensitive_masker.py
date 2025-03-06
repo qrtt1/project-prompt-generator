@@ -20,7 +20,7 @@ DEFAULT_SENSITIVE_PATTERNS = [
     (r'(?i)(password|pwd|pass)[\s]*[=:]\s*["\'`]([^"\'`\s]{6,})["\'`]',
      "Quoted passwords"),
     # Passwords without quotes (e.g., PASSWORD=secret123 in .env)
-    (r'(?i)(password|pwd|pass)[\s]*=[^\s"\'`]{6,}',
+    (r'(?i)(password|pwd|pass)[\s]*=([^\s"\'`]{6,})',
      "Unquoted passwords"),
     # Connection strings (e.g., mongodb://user:pass@host:port/db)
     (r'(?i)(mongodb|postgresql|mysql|redis|sqlserver):\/\/[^:@\s]+:[^@\s]+@[^\/\s]+(?:\/\S+)?',
@@ -109,10 +109,19 @@ class SensitiveMasker:
                         masked_pwd = pwd_match.group(1) + '*' * len(pwd_content) + pwd_match.group(1)
                         return full_match.replace(quoted_pwd, masked_pwd)
 
+                # Handle key-value pairs (both quoted and unquoted)
                 if '=' in full_match:
+                    # Split into key and value parts
                     parts = full_match.split('=', 1)
                     if len(parts) == 2:
-                        return parts[0] + '=' + '*' * len(parts[1].strip('"\'`'))
+                        key_part = parts[0].rstrip()  # Remove trailing whitespace
+                        value_part = parts[1].strip('"\'`')  # Remove quotes if present
+                        # Check if the original had quotes
+                        if parts[1].startswith('"') or parts[1].startswith("'") or parts[1].startswith('`'):
+                            quote = parts[1][0]
+                            return f"{key_part}={quote}{'*' * len(value_part)}{quote}"
+                        else:
+                            return f"{key_part}={'*' * len(value_part)}"
 
                 # Default: mask the entire match
                 masked_count += 1
