@@ -10,8 +10,10 @@ import re
 DEFAULT_SENSITIVE_PATTERNS = [
     # API Keys and Tokens
     r'(api[_-]?key|apikey|api[_-]?token|access[_-]?token)[\s]*[=:]\s*["\'`]([^"\'`\s]+)["\'`]',
-    # Passwords
+    # Passwords with quotes
     r'(password|passwd|pwd)[\s]*[=:]\s*["\'`]([^"\'`\s]+)["\'`]',
+    # Passwords without quotes (like in .env files) - case insensitive
+    r'(?i)(.*password.*)[\s]*[=:]\s*([^\s"\'`]+)',
     # Connection strings
     r'(mongodb|postgresql|mysql|redis):\/\/[^\s\"\'`]+',
     # AWS keys
@@ -96,6 +98,12 @@ class SensitiveMasker:
                     masked_pwd = password_match.group(1) + '*' * len(pwd_content) + password_match.group(1)
                     # Replace just the password part
                     return full_match.replace(quoted_pwd, masked_pwd)
+
+            # Special case for env-style password variables (JENKINS_PASSWORD=abc123)
+            if 'PASSWORD' in full_match and '=' in full_match:
+                parts = full_match.split('=', 1)
+                if len(parts) == 2:
+                    return parts[0] + '=' + '*' * len(parts[1])
 
             # If there are capture groups, we want to keep the variable names but mask the values
             if len(match.groups()) > 0:
