@@ -6,6 +6,7 @@ import stat
 import subprocess
 import sys
 import time
+import platform
 
 
 def main():
@@ -30,8 +31,8 @@ def main():
 
     downloads_dir = os.path.expanduser("~/Downloads")
     scripts = glob.glob(os.path.join(downloads_dir, "*.sh")) + glob.glob(
-        os.path.join(downloads_dir, "*.py"
-    ))
+        os.path.join(downloads_dir, "*.py")
+    )
 
     if not scripts:
         print("No scripts found in ~/Downloads. 😢")
@@ -57,12 +58,111 @@ def main():
         age_str = f"{minutes:2}m{seconds:2}s"
 
         filename = os.path.basename(script)
-        print(f"{i+1}. {age_str} | {filename}")
+        print(f"{i + 1}. {age_str} | {filename}")
+
+    # Add option to create script from clipboard content on macOS
+    if platform.system() == "Darwin":
+        print("c. Create script from clipboard (macOS only) 📝")
 
     try:
-        choice = input("Run script (Enter=1, 2/3, or other to quit): 🚀 ")
+        if platform.system() == "Darwin":
+            choice = input("Run script (Enter=1, 2/3, c to create, or other to quit): 🚀 ")
+        else:
+            choice = input("Run script (Enter=1, 2/3, or other to quit): 🚀 ")
     except KeyboardInterrupt:
         print("\nExiting. 👋")
+        return
+
+    # Handle clipboard script creation on macOS
+    if platform.system() == "Darwin" and choice.lower() == "c":
+        try:
+            # Get clipboard content using pbpaste
+            clipboard_content = subprocess.check_output(['pbpaste']).decode('utf-8')
+
+            # Improved script type detection
+            def detect_script_type(content):
+                """
+                Detect script type more comprehensively based on shebang and content features
+                Returns a tuple of (extension, prefix)
+                """
+                # Remove potential leading whitespace
+                clean_content = content.lstrip()
+
+                # Check for shebang (common variants)
+                python_shebangs = [
+                    '#!/usr/bin/env python',
+                    '#!/usr/bin/python',
+                    '#!/bin/python',
+                    '#! /usr/bin/env python',
+                    '#! /usr/bin/python',
+                    '#!/usr/local/bin/python'
+                ]
+
+                shell_shebangs = [
+                    '#!/bin/bash',
+                    '#!/bin/sh',
+                    '#!/usr/bin/env bash',
+                    '#!/usr/bin/env sh',
+                    '#! /bin/bash',
+                    '#! /bin/sh',
+                    '#!/usr/bin/bash'
+                ]
+
+                # Check for shebang
+                for shebang in python_shebangs:
+                    if clean_content.startswith(shebang):
+                        return ".py", "python"
+
+                for shebang in shell_shebangs:
+                    if clean_content.startswith(shebang):
+                        return ".sh", "bash"
+
+                # Detect based on content features
+                python_indicators = ['import ', 'def ', 'class ', 'print(', '    ', 'if __name__ == "__main__":', '"""',
+                                     "'''"]
+                shell_indicators = ['function ', 'export ', 'echo ', 'if [ ', 'for i in', 'while ', '#!/', 'case ',
+                                    'esac', '$', '${']
+
+                python_score = sum(1 for ind in python_indicators if ind in clean_content)
+                shell_score = sum(1 for ind in shell_indicators if ind in clean_content)
+
+                return (".py", "python") if python_score > shell_score else (".sh", "bash")
+
+            script_extension, script_prefix = detect_script_type(clipboard_content)
+
+            # Ensure shell scripts have a shebang (if they don't already)
+            if script_extension == ".sh" and not any(clipboard_content.lstrip().startswith(s) for s in shell_shebangs):
+                clipboard_content = "#!/bin/bash\n\n" + clipboard_content
+
+            # Allow user to override if Python was detected
+            if script_extension == ".py":
+                print(f"Python script detected. Press Enter to confirm, or type 'sh' to force Shell script:")
+                force_type = input()
+                if force_type.lower() == 'sh':
+                    script_extension = ".sh"
+                    script_prefix = "bash"
+
+            # Create a temporary file
+            temp_script_name = f"/tmp/temp_script_{int(time.time())}{script_extension}"
+            with open(temp_script_name, "w") as temp_script_file:
+                temp_script_file.write(clipboard_content)
+
+            # Make the script executable
+            os.chmod(temp_script_name, os.stat(temp_script_name).st_mode | stat.S_IEXEC)
+
+            print(f"Running script from clipboard: {os.path.basename(temp_script_name)} 🏃‍♂️")
+
+            # Run the script
+            subprocess.run([script_prefix, temp_script_name], check=True)
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error running script: {e} 💥")
+        except FileNotFoundError:
+            print("Script not found. 😓")
+        except OSError as e:
+            print(f"Error changing permissions: {e} 🔑")
+        except Exception as e:
+            print(f"Error creating or running script from clipboard: {e} 😕")
         return
 
     if choice == "":
