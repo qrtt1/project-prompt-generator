@@ -25,7 +25,7 @@ coverage:
 build: setup
 	$(PYTHON) -m build
 
-release: build
+release: clean build
 	$(PYTHON) -m twine upload dist/*
 
 clean:
