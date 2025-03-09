@@ -2,8 +2,7 @@ import argparse
 import os
 import sys
 
-from outputs import (IndividualFilesOutputHandler, JSONOutputHandler,
-                     SingleFileOutputHandler)
+from outputs import JSONOutputHandler, SingleFileOutputHandler
 from prompts.generator import generate
 from prompts.options import JSONFormat, Options, OutputFormat
 from utils.envrc_handler import update_envrc
@@ -33,62 +32,46 @@ formatted markdown files for large language models.""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  ppg              # Generate a single all-in-one file (default)
-  ppg --split      # Generate individual markdown files
+  ppg              # Generate JSON output with content split into lines (default)
+  ppg --markdown       # Generate markdown output (compact format)
   ppg --force      # Force execution outside of a git repository
-  ppg --json       # Generate JSON output (compact format)
-  ppg --json-lines # Generate JSON output with content split into lines
   ppg --update-env # Update .envrc with output paths and exit
 
 Environment Variables:
-  PPG_OUTPUT_DIR           # Custom output directory (default: ppg_generated, used with --split)
   PPG_OUTPUT_FILE          # Custom output filename (default: project_docs.md)
   PPG_IGNORE_FILES         # Comma-separated list of .gitignore files
   PPG_JSON_OUTPUT_FILE     # Custom JSON output filename (default: project_data.json)
 
 For more information, visit: https://github.com/qrtt1/project-prompt-generator
-"""
+""",
     )
 
     # Add common arguments
     parser.add_argument(
         "--no-mask",
         action="store_true",
-        help="Disable sensitive data masking (default: enabled)"
-    )
-
-    # Add --split argument
-    parser.add_argument(
-        "--split",
-        action="store_true",
-        help="Generate individual markdown files instead of a single all-in-one file"
+        help="Disable sensitive data masking (default: enabled)",
     )
 
     # Add --force argument
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Force execution outside of a git repository"
+        help="Force execution outside of a git repository",
     )
 
-    # Add --json argument
+    # Add --markdown argument
     parser.add_argument(
-        "--json",
+        "--markdown",
         action="store_true",
-        help="Generate JSON output instead of markdown"
-    )
-
-    # Add --json-lines argument
-    parser.add_argument(
-        "--json-lines",
-        action="store_true",
-        help="Generate JSON output with content split into lines"
+        dest="markdown",
+        help="Generate markdown output (compact format)",
     )
 
     parser.add_argument(
         "--update-env",
         action="store_true",
-        help="Update .envrc with output paths and exit"
+        help="Update .envrc with output paths and exit",
     )
 
     # Parse arguments
@@ -105,21 +88,17 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
         sys.exit(1)
 
     # Determine output file and directory
-    output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
     output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
     json_output_file = os.environ.get("PPG_JSON_OUTPUT_FILE", "project_data.json")
 
     # Expand ~ to user's home directory
-    output_dir = os.path.expanduser(output_dir)
     output_file = os.path.expanduser(output_file)
     json_output_file = os.path.expanduser(json_output_file)
 
-    if args.split:
-        output_path = os.path.abspath(output_dir)
-    elif args.json or args.json_lines:
-        output_path = os.path.abspath(json_output_file)
-    else:
+    if args.markdown:
         output_path = os.path.abspath(output_file)
+    else:
+        output_path = os.path.abspath(json_output_file)
 
     print(f"Outputting to: {output_path}")
 
@@ -131,19 +110,16 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
     no_mask = args.no_mask
     options = Options(
         no_mask=no_mask,
-        output_dir=output_dir,
         output_file=output_file,
-        output_format=OutputFormat.JSON if (args.json or args.json_lines) else OutputFormat.MARKDOWN,
+        output_format=OutputFormat.MARKDOWN if args.markdown else OutputFormat.JSON,
         json_output_file=json_output_file,
-        json_format=JSONFormat.SPLIT if args.json_lines else JSONFormat.COMPACT
+        json_format=JSONFormat.COMPACT if args.markdown else JSONFormat.SPLIT,
     )
 
-    if args.split:
-        output_handler = IndividualFilesOutputHandler(output_dir)
-    elif args.json or args.json_lines:
-        output_handler = JSONOutputHandler(json_output_file, options.json_format)
-    else:
+    if args.markdown:
         output_handler = SingleFileOutputHandler(output_file)
+    else:
+        output_handler = JSONOutputHandler(json_output_file, options.json_format)
 
     generate(files_to_process, options, output_handler)
 

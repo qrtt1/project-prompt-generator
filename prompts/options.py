@@ -15,8 +15,7 @@ class JSONFormat(Enum):
 @dataclass
 class Options:
     no_mask: bool = False
-    output_dir: str = "ppg_generated"
     output_file: str = "ppg_created_all.md.txt"
-    output_format: OutputFormat = OutputFormat.MARKDOWN
+    output_format: OutputFormat = OutputFormat.JSON
     json_output_file: str = "project_data.json"
-    json_format: JSONFormat = JSONFormat.COMPACT
+    json_format: JSONFormat = JSONFormat.SPLIT
