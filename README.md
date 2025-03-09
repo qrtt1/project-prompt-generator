@@ -25,30 +25,30 @@ pip install .
 Navigate to your project's root directory and use the following command:
 
 ```bash
-# Generate a single all-in-one file (default)
+# Generate JSON output with content split into lines (default)
 ppg
 
-# Generate individual markdown files
-ppg --split
+# Generate markdown output (compact format)
+ppg --markdown
 
-# Generate JSON output (compact format)
-ppg --json
+# Force execution outside of a git repository
+ppg --force
 
-# Generate JSON output with content split into lines
-ppg --json-lines
+# Update .envrc with output paths and exit
+ppg --update-env
 ```
 
 This creates either:
 
-- A single file `ppg_created_all.md.txt` in the current directory containing:
-    - An outline listing all processed files.
+- A JSON file `project_data.json` in the current directory containing:
+    - An outline of all processed files.
     - The content of all files converted to markdown format.
 
-Or, when using `--split`:
+Or, when using `--markdown`:
 
-- A `ppg_generated` directory containing:
-    - Individual markdown files for each project file with a sequential numbering system (e.g., `001_cli.py.md`, `002_README.md.md`, etc.).
-    - Each file includes both the original filename and its relative path in the project.
+- A single file `project_docs.md` in the current directory containing:
+    - An outline listing all processed files.
+    - The content of all files converted to markdown format.
 
 Or, when using `--json` or `--json-lines`:
 
@@ -86,7 +86,6 @@ ppg --update-env
 ```
 
 This will add the following environment variables to your `.envrc` file:
-- `PPG_OUTPUT_DIR`: Directory for split markdown files
 - `PPG_OUTPUT_FILE`: File for consolidated markdown output
 - `PPG_JSON_OUTPUT_FILE`: File for JSON output
 
