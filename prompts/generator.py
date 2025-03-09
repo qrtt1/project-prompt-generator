@@ -1,10 +1,9 @@
-
 import os
 
-from .events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
-                     StartEvent)
-from .file_processor import create_outline, process_file  # add process_file
-from .options import Options
+from outputs.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
+                            StartEvent)
+from prompts import create_outline, process_file
+from prompts.options import Options
 
 
 def _create_masker(no_mask):
@@ -47,7 +46,8 @@ def generate(files_to_process, options: Options, output_handler):
 
             markdown_files_info.append((seq_str, file_entry.filename, md_filename, file_entry.relative_path))
 
-            event = FileProcessedEvent(filename=md_filename, relative_path=file_entry.relative_path, content=file_data["content"])
+            event = FileProcessedEvent(filename=md_filename, relative_path=file_entry.relative_path,
+                                       content=file_data["content"])
             output_handler.fire_event(event)
             print(f"Processed {file_entry.relative_path}")
             seq_counter += 1

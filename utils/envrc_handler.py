@@ -1,5 +1,6 @@
 import os
 
+
 def update_envrc(cwd):
     """
     Updates the .envrc file with PPG_OUTPUT_FILE, PPG_OUTPUT_DIR, and PPG_JSON_OUTPUT_FILE variables.

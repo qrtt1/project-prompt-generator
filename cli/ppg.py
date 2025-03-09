@@ -2,16 +2,13 @@ import argparse
 import os
 import sys
 
-from prompts.events import (EndEvent, FileProcessedEvent, OutlineCreatedEvent,
-                            StartEvent)
-from utils.file_walker import FileWalker
+from outputs import (IndividualFilesOutputHandler, JSONOutputHandler,
+                     SingleFileOutputHandler)
 from prompts.generator import generate
-from utils.ignore_handler import build_ignores
+from prompts.options import JSONFormat, Options, OutputFormat
 from utils.envrc_handler import update_envrc
-from prompts.options import Options, OutputFormat, JSONFormat
-from prompts.output_handler import (IndividualFilesOutputHandler,
-                                    SingleFileOutputHandler,
-                                    JSONOutputHandler)
+from utils.file_walker import FileWalker
+from utils.ignore_handler import build_ignores
 
 
 def is_git_repository(path):
@@ -111,7 +108,7 @@ For more information, visit: https://github.com/qrtt1/project-prompt-generator
     output_dir = os.environ.get("PPG_OUTPUT_DIR", "ppg_generated")
     output_file = os.environ.get("PPG_OUTPUT_FILE", "project_docs.md")
     json_output_file = os.environ.get("PPG_JSON_OUTPUT_FILE", "project_data.json")
-    
+
     # Expand ~ to user's home directory
     output_dir = os.path.expanduser(output_dir)
     output_file = os.path.expanduser(output_file)

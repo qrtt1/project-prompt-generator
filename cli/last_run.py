@@ -2,11 +2,11 @@
 import argparse
 import glob
 import os
+import platform
 import stat
 import subprocess
 import sys
 import time
-import platform
 
 
 def main():
