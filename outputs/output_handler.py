@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Callable
 
 from outputs.events import Event
@@ -25,3 +25,7 @@ class OutputHandler(ABC):
         if event_name in self._event_handlers:
             for handler in self._event_handlers[event_name]:
                 handler(event)
+
+    def copy_to_clipboard(self, output_file_path: str):
+        from outputs import osx_copy_to_clipboard
+        osx_copy_to_clipboard(output_file_path)

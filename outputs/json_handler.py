@@ -31,6 +31,7 @@ class JSONOutputHandler(OutputHandler):
         self.project_data = {"outline": [], "files": []}
         self.on("OutlineCreatedEvent", self._handle_outline_created)
         self.on("FileProcessedEvent", self._handle_file_processed)
+        self.on("EndEvent", self._handle_end_event)
 
     def _handle_outline_created(self, event):
         # Parse the outline content to create structured data
@@ -75,15 +76,24 @@ class JSONOutputHandler(OutputHandler):
 
         self.project_data["files"].append(file_data)
 
+    def _handle_end_event(self, event):
+        """
+        Handle the EndEvent by writing the collected data to a JSON file.
+
+        Args:
+            event: The EndEvent containing the completion message
+        """
+        with open(expanduser(self.output_file), "w", encoding="utf-8") as f:
+            json.dump(self.project_data, f, indent=2, ensure_ascii=False)
+        print(f"JSON output written to {self.output_file}")
+        self.copy_to_clipboard(os.path.abspath(expanduser(self.output_file)))
+
     def fire_event(self, event: Event):
         """
         Fire an event to notify listeners.
         """
         event_name = type(event).__name__
-        if event_name == "EndEvent":
-            with open(expanduser(self.output_file), "w", encoding="utf-8") as f:
-                json.dump(self.project_data, f, indent=2, ensure_ascii=False)
-        else:
-            if event_name in self._event_handlers:
-                for handler in self._event_handlers[event_name]:
-                    handler(event)
+        if event_name in self._event_handlers:
+            for handler in self._event_handlers[event_name]:
+                handler(event)
+
