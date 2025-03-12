@@ -9,6 +9,7 @@ def update_envrc(cwd):
     envrc_path = os.path.join(cwd, ".envrc")
     output_file_line = f'export PPG_OUTPUT_FILE="~/Downloads/$(basename $PWD).txt"\n'
     json_output_file_line = f'export PPG_JSON_OUTPUT_FILE="~/Downloads/$(basename $PWD).json.txt"\n'
+    tree_json_output_file_line = f'export PPG_TREE_JSON_OUTPUT_FILE="~/Downloads/$(basename $PWD).tree.json.txt"\n'
     clipboard_enabled_line = 'export PPG_ENABLE_CLIPBOARD="false"\n'
 
     # Read existing .envrc
@@ -33,6 +34,8 @@ def update_envrc(cwd):
         new_lines.append(output_file_line)
     if not is_variable_defined('PPG_JSON_OUTPUT_FILE', existing_lines):
         new_lines.append(json_output_file_line)
+    if not is_variable_defined('PPG_TREE_JSON_OUTPUT_FILE', existing_lines):
+        new_lines.append(tree_json_output_file_line)
 
     # Check if PPG_ENABLE_CLIPBOARD is defined, if not, append it
     if not is_variable_defined('PPG_ENABLE_CLIPBOARD', existing_lines):
@@ -44,6 +47,8 @@ def update_envrc(cwd):
             updated_variables.append("PPG_OUTPUT_FILE")
         if json_output_file_line in new_lines:
             updated_variables.append("PPG_JSON_OUTPUT_FILE")
+        if tree_json_output_file_line in new_lines:
+            updated_variables.append("PPG_TREE_JSON_OUTPUT_FILE")
         if clipboard_enabled_line in new_lines:
             updated_variables.append("PPG_ENABLE_CLIPBOARD")
 
