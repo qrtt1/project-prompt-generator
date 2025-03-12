@@ -5,7 +5,7 @@ import sys
 from outputs import JSONOutputHandler, SingleFileOutputHandler
 from prompts.generator import generate
 from prompts.options import JSONFormat, Options, OutputFormat
-from utils.envrc_handler import update_envrc
+from utils.envrc import update_envrc
 from utils.file_walker import FileWalker
 from utils.ignore_handler import build_ignores
 
