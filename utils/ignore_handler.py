@@ -9,6 +9,7 @@ def build_ignores(project_root):
     Loads gitignore patterns from multiple sources:
     1. .gitignore in the current working directory
     2. Files specified in the PPG_IGNORE_FILES environment variable
+    3. .git/info/exclude in the .git directory if it exists
 
     Args:
         project_root (str): The root directory of the project.
@@ -38,6 +39,16 @@ def build_ignores(project_root):
                 print(f"Loaded gitignore patterns from: {ignore_file}")
             else:
                 print(f"Warning: gitignore file not found: {ignore_file}")
+
+    # Load .git/info/exclude if it exists
+    git_exclude_path = os.path.join(project_root, ".git", "info", "exclude")
+    if os.path.exists(git_exclude_path):
+        try:
+            with open(git_exclude_path, "r", encoding="utf-8") as f:
+                patterns.extend(f.read().splitlines())
+            print(f"Loaded gitignore patterns from: {git_exclude_path}")
+        except Exception as e:
+            print(f"Warning: Could not read {git_exclude_path}: {e}")
 
     if patterns:
         # Remove empty lines and strip whitespace
